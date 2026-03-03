@@ -23,11 +23,6 @@
             <artifactId>lexcupstudio-ui-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.lexcupstudio</groupId>
-            <artifactId>lexcupstudio-engine</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

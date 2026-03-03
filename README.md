@@ -17,8 +17,7 @@ Que cualquier proyecto nuevo pueda:
 - `example-language/`: ejemplo funcional con generación JFlex + CUP y adapters reales.
 - `example-language-archetype/`: generador Maven para crear un proyecto base listo.
 - `ui-api/`: contrato para conectar lógica de lenguaje a la UI.
-- `plugin-example/`: implementación de referencia del contrato de UI.
-- `engine/`: lógica base (automatas, compiler, language, reports).
+- `plugin-example/`: implementación mock de referencia del contrato de UI.
 - `ui-shell/`: interfaz JavaFX desacoplada de la lógica.
 
 ## Uso rápido

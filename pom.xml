@@ -17,7 +17,6 @@
         <module>example-language</module>
         <module>example-language-archetype</module>
         <module>ui-api</module>
-        <module>engine</module>
         <module>plugin-example</module>
         <module>ui-shell</module>
     </modules>
