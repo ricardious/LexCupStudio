@@ -695,28 +695,28 @@
     -fx-background-color: #393c43;
 }
 
-.syntax-keyword {
+.code-area .syntax-keyword {
     -fx-fill: #4FC1FF;
     -fx-font-weight: bold;
 }
 
-.syntax-string {
+.code-area .syntax-string {
     -fx-fill: #CE9178;
 }
 
-.syntax-comment {
+.code-area .syntax-comment {
     -fx-fill: #6A9955;
     -fx-font-style: italic;
 }
 
-.syntax-number {
+.code-area .syntax-number {
     -fx-fill: #B5CEA8;
 }
 
-.syntax-operator {
+.code-area .syntax-operator {
     -fx-fill: #D4D4D4;
 }
 
-.syntax-delimiter {
+.code-area .syntax-delimiter {
     -fx-fill: #C586C0;
 }
