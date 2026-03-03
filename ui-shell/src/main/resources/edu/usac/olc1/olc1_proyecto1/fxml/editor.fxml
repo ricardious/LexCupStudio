@@ -500,8 +500,7 @@
 
                                         <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-                                            <TextArea fx:id="problemsPanel" editable="false"
-                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                            <ListView fx:id="problemsPanel" styleClass="problems-list"
                                                       visible="false"/>
 
                                             <TextArea fx:id="outputPanel" editable="false"

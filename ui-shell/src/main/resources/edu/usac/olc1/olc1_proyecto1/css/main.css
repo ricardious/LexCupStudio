@@ -720,3 +720,39 @@
 .code-area .syntax-delimiter {
     -fx-fill: #09A1ED;
 }
+
+.code-area .syntax-error {
+    -fx-underline: true;
+    -fx-background-color: rgba(255, 92, 87, 0.22);
+}
+
+.problems-list {
+    -fx-background-color: #1F2228;
+    -fx-control-inner-background: #1F2228;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.problems-list .virtual-flow,
+.problems-list .clipped-container,
+.problems-list .sheet,
+.problems-list .viewport {
+    -fx-background-color: #1F2228;
+}
+
+.problems-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(171, 178, 191);
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 13px;
+    -fx-padding: 6px 10px;
+}
+
+.problems-list .list-cell:filled:selected {
+    -fx-background-color: rgba(97, 175, 239, 0.25);
+    -fx-text-fill: rgb(171, 178, 191);
+}
+
+.problems-list .list-cell:filled:hover {
+    -fx-background-color: rgba(97, 175, 239, 0.12);
+}

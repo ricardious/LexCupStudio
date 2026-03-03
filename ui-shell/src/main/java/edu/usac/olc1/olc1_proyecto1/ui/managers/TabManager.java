@@ -231,6 +231,14 @@ public class TabManager {
         return fileMap.get(selectedTab);
     }
 
+    public CodeArea getActiveCodeArea() {
+        Tab selectedTab = editorTabPane.getSelectionModel().getSelectedItem();
+        if (selectedTab == null) return null;
+        VirtualizedScrollPane<CodeArea> scrollPane = contentMap.get(selectedTab);
+        if (scrollPane == null) return null;
+        return scrollPane.getContent();
+    }
+
     public void registerTab(Tab tab, Node content) {
         if (content != null) {
             nodeMap.put(tab, content);

@@ -9,12 +9,17 @@ import edu.usac.olc1.olc1_proyecto1.ui.managers.TabManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.BrandingConfig;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.ResourceManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.WindowDragger;
+import io.lexcupstudio.ui.api.DiagnosticType;
+import io.lexcupstudio.ui.api.LanguageRuntimePlugin;
+import io.lexcupstudio.ui.api.SourceDiagnostic;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,9 +27,12 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
@@ -38,8 +46,12 @@ import org.fxmisc.richtext.LineNumberFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -100,7 +112,10 @@ public class EditorController implements Initializable {
     private ToggleGroup tabGroup;
 
     @FXML
-    private TextArea problemsPanel, outputPanel, debugConsolePanel, reportsPanel;
+    private ListView<ProblemEntry> problemsPanel;
+
+    @FXML
+    private TextArea outputPanel, debugConsolePanel, reportsPanel;
 
     @FXML
     private Terminal terminal;
@@ -140,9 +155,14 @@ public class EditorController implements Initializable {
     private TabManager tabManager;
     private final AutoCompletionManager autoCompletionManager = new AutoCompletionManager();
     private final SyntaxHighlightingManager syntaxHighlightingManager = new SyntaxHighlightingManager();
+    private final LanguageRuntimePlugin languagePlugin = resolveLanguagePlugin();
+    private final List<ProblemEntry> currentProblems = new ArrayList<>();
+    private final PauseTransition diagnosticsDebounce = new PauseTransition(Duration.millis(350));
     private static final Logger LOGGER = Logger.getLogger(EditorController.class.getName());
     private boolean isPanelExpanded = true;
     private double originalDividerPosition;
+    private CodeArea trackedCodeArea;
+    private final ChangeListener<String> diagnosticsTextListener = (obs, oldText, newText) -> diagnosticsDebounce.playFromStart();
 
     /**
      * @param url
@@ -197,6 +217,8 @@ public class EditorController implements Initializable {
         explorer.setOnMouseClicked(this::handleTreeViewClick);
 
         setupTabSwitching();
+        setupProblemsPanel();
+        setupDiagnosticsTracking();
 
         hideTerminalPanel();
 
@@ -206,12 +228,10 @@ public class EditorController implements Initializable {
                 "ricardious",
                 new edu.usac.olc1.olc1_proyecto1.ui.components.commands.RicardiousCommandHandler(
                         terminal,
-                        // ActiveFileAccessor: cómo obtener el archivo abierto en la tab activa
                         () -> {
-                            // Ajusta esto a tu TabManager. Lo ideal: que exponga getActiveFile().
                             java.io.File f = null;
                             try {
-                                f = tabManager.getActiveFile(); // <-- implementa este método si no existe
+                                f = tabManager.getActiveFile();
                             } catch (Exception ignore) {}
                             return f;
                         }
@@ -271,7 +291,31 @@ public class EditorController implements Initializable {
     }
 
     private void runAllTabs() {
-        System.out.println("Run button pressed.");
+        CodeArea activeEditor = tabManager.getActiveCodeArea();
+        if (activeEditor == null) {
+            appendOutput("No hay un editor de código activo para ejecutar.");
+            return;
+        }
+
+        analyzeEditor(activeEditor, true);
+
+        if (languagePlugin == null) {
+            appendOutput("No hay plugin de lenguaje cargado (LanguageRuntimePlugin).");
+            return;
+        }
+
+        Path projectDir = resolveProjectDirectory();
+        boolean ok = languagePlugin.run(
+                activeEditor.getText(),
+                projectDir,
+                this::appendOutput
+        );
+
+        if (ok) {
+            appendOutput("Ejecución completada. Reportes en: " + projectDir.resolve(languagePlugin.reportsDirectoryName()));
+        } else {
+            appendOutput("Ejecución finalizada con errores.");
+        }
     }
 
     private void setupTabSwitching() {
@@ -327,6 +371,165 @@ public class EditorController implements Initializable {
                 tabGroup.selectToggle(tabGroup.getToggles().get(0));
             }
         }
+    }
+
+    private void setupProblemsPanel() {
+        problemsPanel.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(ProblemEntry item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(item.prettyText());
+            }
+        });
+
+        problemsPanel.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                ProblemEntry selected = problemsPanel.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    goToProblem(selected);
+                }
+            }
+        });
+
+        problemsPanel.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                ProblemEntry selected = problemsPanel.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    goToProblem(selected);
+                }
+            }
+        });
+    }
+
+    private void setupDiagnosticsTracking() {
+        diagnosticsDebounce.setOnFinished(event -> {
+            CodeArea activeEditor = tabManager.getActiveCodeArea();
+            if (activeEditor != null) {
+                analyzeEditor(activeEditor, false);
+            }
+        });
+
+        editorTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> bindActiveEditorTracking());
+        Platform.runLater(this::bindActiveEditorTracking);
+    }
+
+    private void bindActiveEditorTracking() {
+        if (trackedCodeArea != null) {
+            trackedCodeArea.textProperty().removeListener(diagnosticsTextListener);
+        }
+
+        trackedCodeArea = tabManager.getActiveCodeArea();
+        if (trackedCodeArea == null) {
+            currentProblems.clear();
+            problemsPanel.getItems().clear();
+            return;
+        }
+
+        trackedCodeArea.textProperty().addListener(diagnosticsTextListener);
+        diagnosticsDebounce.playFromStart();
+    }
+
+    private void analyzeEditor(CodeArea editor, boolean logToOutput) {
+        if (languagePlugin == null) {
+            syntaxHighlightingManager.clearDiagnostics(editor);
+            currentProblems.clear();
+            problemsPanel.getItems().setAll(currentProblems);
+            return;
+        }
+
+        Path projectDir = resolveProjectDirectory();
+        List<SourceDiagnostic> diagnostics = languagePlugin.analyze(
+                editor.getText(),
+                projectDir,
+                logToOutput ? this::appendOutput : msg -> {}
+        );
+        if (diagnostics == null) {
+            diagnostics = List.of();
+        }
+
+        currentProblems.clear();
+        for (SourceDiagnostic diagnostic : diagnostics) {
+            currentProblems.add(new ProblemEntry(diagnostic));
+        }
+
+        problemsPanel.getItems().setAll(currentProblems);
+        syntaxHighlightingManager.setDiagnostics(editor, diagnostics);
+        if (!currentProblems.isEmpty()) {
+            selectBottomTab("PROBLEMS");
+        }
+    }
+
+    private void selectBottomTab(String tabName) {
+        for (Toggle toggle : tabGroup.getToggles()) {
+            if (toggle instanceof ToggleButton button && tabName.equalsIgnoreCase(button.getText())) {
+                tabGroup.selectToggle(toggle);
+                return;
+            }
+        }
+    }
+
+    private void goToProblem(ProblemEntry problem) {
+        CodeArea editor = tabManager.getActiveCodeArea();
+        if (editor == null) {
+            return;
+        }
+        SourceDiagnostic diagnostic = problem.diagnostic();
+        int offset = offsetForLineColumn(editor.getText(), diagnostic.getLine(), diagnostic.getColumn());
+        editor.requestFocus();
+        editor.moveTo(offset);
+        editor.requestFollowCaret();
+    }
+
+    private int offsetForLineColumn(String text, int line, int column) {
+        int targetLine = Math.max(1, line);
+        int targetColumn = Math.max(1, column);
+
+        int currentLine = 1;
+        int currentColumn = 1;
+        for (int i = 0; i < text.length(); i++) {
+            if (currentLine == targetLine && currentColumn == targetColumn) {
+                return i;
+            }
+            char c = text.charAt(i);
+            if (c == '\n') {
+                currentLine++;
+                currentColumn = 1;
+            } else {
+                currentColumn++;
+            }
+        }
+        return text.length();
+    }
+
+    private Path resolveProjectDirectory() {
+        File activeFile = tabManager.getActiveFile();
+        if (activeFile != null && activeFile.getParentFile() != null) {
+            return activeFile.getParentFile().toPath();
+        }
+        if (selectedDirectory != null) {
+            return selectedDirectory.toPath();
+        }
+        return Path.of(System.getProperty("user.dir"));
+    }
+
+    private void appendOutput(String message) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+        outputPanel.appendText(message.endsWith("\n") ? message : message + "\n");
+    }
+
+    private static LanguageRuntimePlugin resolveLanguagePlugin() {
+        ServiceLoader<LanguageRuntimePlugin> loader = ServiceLoader.load(LanguageRuntimePlugin.class);
+        Optional<LanguageRuntimePlugin> maybe = loader.stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(plugin -> "ricardious".equalsIgnoreCase(plugin.commandName()))
+                .findFirst();
+        return maybe.orElseGet(() -> loader.findFirst().orElse(null));
     }
 
     private void setupWindowControls() {
@@ -517,6 +720,13 @@ public class EditorController implements Initializable {
     @FXML
     private void handleRunAction(ActionEvent event) {
         runAllTabs();
+    }
+
+    private record ProblemEntry(SourceDiagnostic diagnostic) {
+        String prettyText() {
+            return "[" + diagnostic.getType() + "] L" + diagnostic.getLine() + ":C" + diagnostic.getColumn()
+                    + " - " + diagnostic.getMessage();
+        }
     }
 
     @FXML
