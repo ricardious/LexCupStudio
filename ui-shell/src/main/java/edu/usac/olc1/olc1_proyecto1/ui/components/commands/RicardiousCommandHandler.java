@@ -1,13 +1,15 @@
 package edu.usac.olc1.olc1_proyecto1.ui.components.commands;
 
-import edu.usac.olc1.olc1_proyecto1.compiler.CompilerPipeline;
 import edu.usac.olc1.olc1_proyecto1.ui.components.ActiveFileAccessor;
 import edu.usac.olc1.olc1_proyecto1.ui.components.Terminal;
+import io.lexcupstudio.ui.api.LanguageRuntimePlugin;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 /**
  * ricardious [ruta/opcional]
@@ -19,10 +21,12 @@ public class RicardiousCommandHandler implements CommandHandler {
 
     private final Terminal terminal;
     private final ActiveFileAccessor activeFileAccessor;
+    private final LanguageRuntimePlugin plugin;
 
     public RicardiousCommandHandler(Terminal terminal, ActiveFileAccessor accessor) {
         this.terminal = Objects.requireNonNull(terminal);
         this.activeFileAccessor = Objects.requireNonNull(accessor);
+        this.plugin = resolvePlugin();
     }
 
     @Override
@@ -49,19 +53,32 @@ public class RicardiousCommandHandler implements CommandHandler {
             Path baseDir = file.getParentFile().toPath();
 
             terminal.displayOutput("Ejecutando ricardious sobre: " + file.getAbsolutePath());
-            boolean ok = CompilerPipeline.run(
+            if (plugin == null) {
+                return "No hay plugin de lenguaje cargado. " +
+                        "Agrega una implementación de LanguageRuntimePlugin.\n";
+            }
+            boolean ok = plugin.run(
                     src,
                     baseDir,
                     (msg) -> terminal.displayOutput(msg)
             );
 
             return ok
-                    ? "Ejecución completada. Revisa: " + baseDir.resolve("output") + "\n"
-                    : "Ejecución con errores. Revisa: " + baseDir.resolve("output") + "\n";
+                    ? "Ejecución completada. Revisa: " + baseDir.resolve(plugin.reportsDirectoryName()) + "\n"
+                    : "Ejecución con errores. Revisa: " + baseDir.resolve(plugin.reportsDirectoryName()) + "\n";
 
         } catch (Exception ex) {
             ex.printStackTrace();
             return "Error al ejecutar ricardious: " + ex.getMessage() + "\n";
         }
+    }
+
+    private static LanguageRuntimePlugin resolvePlugin() {
+        ServiceLoader<LanguageRuntimePlugin> loader = ServiceLoader.load(LanguageRuntimePlugin.class);
+        Optional<LanguageRuntimePlugin> maybe = loader.stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(p -> "ricardious".equalsIgnoreCase(p.commandName()))
+                .findFirst();
+        return maybe.orElseGet(() -> loader.findFirst().orElse(null));
     }
 }

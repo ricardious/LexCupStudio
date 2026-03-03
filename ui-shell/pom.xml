@@ -22,8 +22,14 @@
     <dependencies>
         <dependency>
             <groupId>io.lexcupstudio</groupId>
-            <artifactId>lexcupstudio-engine</artifactId>
+            <artifactId>lexcupstudio-ui-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.lexcupstudio</groupId>
+            <artifactId>lexcupstudio-plugin-example</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
