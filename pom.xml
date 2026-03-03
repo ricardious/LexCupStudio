@@ -16,6 +16,7 @@
         <module>starter</module>
         <module>example-language</module>
         <module>example-language-archetype</module>
+        <module>ui-shell</module>
     </modules>
 
     <properties>

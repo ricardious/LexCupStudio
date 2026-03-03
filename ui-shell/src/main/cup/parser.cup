@@ -1,0 +1,331 @@
+/* ========= AutómataLab - Parser (CUP) ========= */
+package edu.usac.olc1.olc1_proyecto1.compiler;
+
+import java_cup.runtime.*;
+import java.util.*;
+import edu.usac.olc1.olc1_proyecto1.compiler.CompilerError;
+import edu.usac.olc1.olc1_proyecto1.language.Interpreter;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.Statement;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.DefinitionAFDNode;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.DefinitionAPNode;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.VerAutomatasNode;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.DescNode;
+import edu.usac.olc1.olc1_proyecto1.language.nodes.ValidateCallNode;
+import edu.usac.olc1.olc1_proyecto1.automata.TransitionAFD;
+import edu.usac.olc1.olc1_proyecto1.automata.AP;
+
+class Parser;
+
+/* ---------------- Parser class custom code ---------------- */
+parser code {:
+    private final ArrayList<CompilerError> errors = new ArrayList<>();
+    private final List<Statement> program = new ArrayList<>();
+    private Interpreter interpreter;
+
+    public Parser(java_cup.runtime.Scanner lexer, Interpreter interpreter) {
+        super(lexer);
+        this.interpreter = interpreter;
+    }
+
+    public ArrayList<CompilerError> getErrors() { return errors; }
+    public List<Statement> getProgram() { return program; }
+
+    @Override
+    public void syntax_error(Symbol s) {
+        String tokenName = (s != null && s.sym >= 0 && s.sym < ParserSym.terminalNames.length)
+                ? ParserSym.terminalNames[s.sym] : "UNKNOWN";
+        errors.add(new CompilerError(
+                "Syntax",
+                "Syntax error at line " + s.left + ", column " + s.right +
+                ". Found: '" + s.value + "' (" + tokenName + ")",
+                s.left, s.right));
+    }
+
+    @Override
+    public void report_error(String message, Object info) {
+        if (info instanceof Symbol s) {
+            errors.add(new CompilerError("Syntax", message + " at line " + s.left + ", column " + s.right, s.left, s.right));
+        } else {
+            errors.add(new CompilerError("Syntax", message, 0, 0));
+        }
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol s) throws Exception {
+        errors.add(new CompilerError("Fatal Syntax",
+                "Unrecoverable syntax error at line " + s.left + ", column " + s.right +
+                ". Found: '" + s.value + "'", s.left, s.right));
+        // throw new Exception("Parsing aborted");
+    }
+
+    private static String unquote(String s) {
+        if (s == null) return null;
+        if (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")) return s.substring(1, s.length() - 1);
+        return s;
+    }
+:};
+
+/* ---------------- Terminals (must match the lexer) ---------------- */
+terminal AFD, AP, AFD_CLOSE, AP_CLOSE, LT, GT;
+terminal NOMBRE, SECTION_N, SECTION_T, SECTION_P, SECTION_I, SECTION_A, TRANSICIONES;
+terminal VER_AUTOMATAS, DESC;
+terminal ARROW, PIPE, SEMI, COMMA, COLON, EQUALS;
+terminal LBRACE, RBRACE, LPAREN, RPAREN, LBRACKET, RBRACKET;
+terminal DOLLAR, HASH;
+terminal String ID;
+terminal String STRING;
+terminal Integer INTEGER; /* kept to match lexer (even if unused) */
+
+/* ---------------- Non-terminals ---------------- */
+non terminal List program, stmts;
+non terminal Statement stmt;
+
+non terminal Statement afd_def, ap_def, ver_auto_stmt, desc_stmt, validate_stmt;
+
+non terminal List<String> id_list;
+
+// Non-terminals for AFD transitions
+non terminal List<TransitionAFD> afd_transition_stmts;
+non terminal List<TransitionAFD> afd_transition_stmt;
+non terminal List<Object[]> afd_transition_alternatives;
+non terminal Object[] afd_single_transition;
+
+// Non-terminals for AP transitions
+non terminal List<AP.TransitionAP> ap_transition_stmts;
+non terminal List<AP.TransitionAP> ap_transition_stmt;
+non terminal List<Object[]> ap_transition_alternatives;
+non terminal Object[] ap_single_transition;
+
+non terminal String sym;
+
+/* ---------------- Start ---------------- */
+start with program;
+
+/* ---------------- Program ---------------- */
+program ::=
+    stmts:s
+    {:
+        RESULT = s;
+        if (interpreter != null) {
+            @SuppressWarnings("unchecked")
+            List<Statement> list = (List<Statement>) s;
+            interpreter.execute(list);
+        }
+    :}
+    ;
+
+stmts ::=
+    stmts:s stmt:t
+    {:
+        List tmp = (s == null) ? new ArrayList() : s;
+        if (t != null) tmp.add(t);
+        RESULT = tmp;
+    :}
+    | /* empty */
+    {:
+        RESULT = new ArrayList();
+    :}
+    ;
+
+stmt ::=
+    afd_def:a          {: RESULT = a; :}
+    | ap_def:a             {: RESULT = a; :}
+    | ver_auto_stmt:v      {: RESULT = v; :}
+    | desc_stmt:d          {: RESULT = d; :}
+    | validate_stmt:v      {: RESULT = v; :}
+    ;
+
+/* ---------------- AFD definition ---------------- */
+afd_def ::=
+    LT AFD NOMBRE EQUALS STRING:nm GT
+        SECTION_N EQUALS LBRACE id_list:states RBRACE SEMI
+        SECTION_T EQUALS LBRACE id_list:alpha  RBRACE SEMI
+        SECTION_I EQUALS LBRACE ID:init        RBRACE SEMI
+        SECTION_A EQUALS LBRACE id_list:acc    RBRACE SEMI
+        TRANSICIONES COLON afd_transition_stmts:tl
+    AFD_CLOSE
+    {:
+        RESULT = new DefinitionAFDNode(
+            unquote(nm),
+            new LinkedHashSet<>(states),
+            new LinkedHashSet<>(alpha),
+            init,
+            new LinkedHashSet<>(acc),
+            tl,
+            null
+        );
+    :}
+    ;
+
+/* A list of transition statements (e.g., S -> ...; A -> ...;) */
+afd_transition_stmts ::=
+    afd_transition_stmt:s
+    {:
+        RESULT = s;
+    :}
+    | afd_transition_stmts:list afd_transition_stmt:s
+    {:
+        list.addAll(s);
+        RESULT = list;
+    :}
+    ;
+
+/* A single state's transition statement (e.g., S -> 1, A | 0, B ;) */
+afd_transition_stmt ::=
+    ID:from ARROW afd_transition_alternatives:alts SEMI
+    {:
+        List<TransitionAFD> transitions = new ArrayList<>();
+        for (Object[] alt : alts) { // alt is {symbol, destination}
+            transitions.add(new TransitionAFD(from, (String)alt[0], (String)alt[1]));
+        }
+        RESULT = transitions;
+    :}
+    ;
+
+/* A list of alternatives for a single state (e.g., 1, A | 0, B) */
+afd_transition_alternatives ::=
+    afd_single_transition:t
+    {:
+        List<Object[]> list = new ArrayList<>();
+        list.add(t);
+        RESULT = list;
+    :}
+    | afd_transition_alternatives:list PIPE afd_single_transition:t
+    {:
+        list.add(t);
+        RESULT = list;
+    :}
+    ;
+
+/* A single transition part (e.g., 1, A) */
+afd_single_transition ::=
+    sym:s COMMA ID:to
+    {: RESULT = new Object[]{s, to}; :}
+    ;
+
+
+/* ---------------- AP definition ---------------- */
+ap_def ::=
+    LT AP NOMBRE EQUALS STRING:nm GT
+        SECTION_N EQUALS LBRACE id_list:states RBRACE SEMI
+        SECTION_T EQUALS LBRACE id_list:alpha  RBRACE SEMI
+        SECTION_P EQUALS LBRACE id_list:stack  RBRACE SEMI
+        SECTION_I EQUALS LBRACE ID:init        RBRACE SEMI
+        SECTION_A EQUALS LBRACE id_list:acc    RBRACE SEMI
+        TRANSICIONES COLON ap_transition_stmts:tl
+    AP_CLOSE
+    {:
+        RESULT = new DefinitionAPNode(
+            unquote(nm),
+            new LinkedHashSet<>(states),
+            new LinkedHashSet<>(alpha),
+            new LinkedHashSet<>(stack),
+            init,
+            new LinkedHashSet<>(acc),
+            tl,
+            null
+        );
+    :}
+    ;
+
+/* A list of transition statements for an AP */
+ap_transition_stmts ::=
+    ap_transition_stmt:s
+    {:
+        RESULT = s;
+    :}
+    | ap_transition_stmts:list ap_transition_stmt:s
+    {:
+        list.addAll(s);
+        RESULT = list;
+    :}
+    ;
+
+/* A single state's transition statement for an AP */
+ap_transition_stmt ::=
+    ID:from ap_transition_alternatives:alts SEMI
+    {:
+        List<AP.TransitionAP> transitions = new ArrayList<>();
+        for (Object[] alt : alts) { // alt is {in, pop, to, push}
+            transitions.add(new AP.TransitionAP(from, (String)alt[0], (String)alt[1], (String)alt[2], (String)alt[3]));
+        }
+        RESULT = transitions;
+    :}
+    ;
+
+/* A list of alternatives for a single AP state */
+ap_transition_alternatives ::=
+    ap_single_transition:t
+    {:
+        List<Object[]> list = new ArrayList<>();
+        list.add(t);
+        RESULT = list;
+    :}
+    | ap_transition_alternatives:list PIPE ap_single_transition:t
+    {:
+        list.add(t);
+        RESULT = list;
+    :}
+    ;
+
+/* A single transition part for an AP: (a) -> ($), B : (a) */
+ap_single_transition ::=
+    LPAREN sym:in RPAREN ARROW LPAREN sym:pop RPAREN COMMA ID:to COLON LPAREN sym:push RPAREN
+    {:
+        RESULT = new Object[]{in, pop, to, push};
+    :}
+    ;
+
+/* ---------------- Common Rules ---------------- */
+/* ID list: ID ( , ID )* */
+id_list ::=
+    sym:s
+    {:
+        List<String> list = new ArrayList<>();
+        list.add(s);
+        RESULT = list;
+    :}
+    | sym:s COMMA id_list:r
+    {:
+        r.add(0, s);
+        RESULT = r;
+    :}
+    ;
+
+
+/* ---------------- Built-ins ---------------- */
+
+/* verAutomatas(); */
+ver_auto_stmt ::=
+    VER_AUTOMATAS LPAREN RPAREN SEMI
+    {:
+        RESULT = new VerAutomatasNode();
+    :}
+    ;
+
+/* desc(ID); */
+desc_stmt ::=
+    DESC LPAREN ID:name RPAREN SEMI
+    {:
+        RESULT = new DescNode(name);
+    :}
+    ;
+
+/* AutomatonName("string"); */
+validate_stmt ::=
+    ID:name LPAREN STRING:s RPAREN SEMI
+    {:
+        RESULT = new ValidateCallNode(name, unquote(s));
+    :}
+    ;
+
+/* ---------------- Helpers ---------------- */
+
+/* symbol used in alphabet/stack/transition: ID | STRING | $ | # | INTEGER */
+sym ::=
+    ID:i        {: RESULT = i; :}
+    | STRING:s    {: RESULT = unquote(s); :}
+    | INTEGER:n   {: RESULT = String.valueOf(n); :}
+    | DOLLAR      {: RESULT = "$"; :}
+    | HASH        {: RESULT = "#"; :}
+    ;

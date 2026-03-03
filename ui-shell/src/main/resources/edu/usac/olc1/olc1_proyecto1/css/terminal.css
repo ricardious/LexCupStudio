@@ -1,0 +1,19 @@
+.terminal-component {
+    -fx-background-color: #1F2228;
+    -fx-border-color: transparent;
+}
+
+.terminal-content {
+    -fx-background-color: #1F2228;
+}
+
+.terminal-input {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(171, 178, 191);
+    -fx-font-family: 'JetBrains Mono';
+    -fx-font-size: 14;
+    -fx-border-color: transparent;
+    -fx-highlight-fill: rgba(97, 175, 239, 0.3);
+    -fx-highlight-text-fill: rgb(171, 178, 191);
+    -fx-prompt-text-fill: rgb(128, 128, 128);
+}

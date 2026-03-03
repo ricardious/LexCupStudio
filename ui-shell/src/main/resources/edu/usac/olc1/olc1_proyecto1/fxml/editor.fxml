@@ -1,0 +1,882 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.fxmisc.richtext.CodeArea?>
+
+<?import javafx.scene.control.Tooltip?>
+<?import edu.usac.olc1.olc1_proyecto1.ui.components.CustomSplitMenuButton?>
+<?import edu.usac.olc1.olc1_proyecto1.ui.components.SVGImageView?>
+
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import edu.usac.olc1.olc1_proyecto1.ui.components.Terminal?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="637.0"
+            prefWidth="1059.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.usac.olc1.olc1_proyecto1.ui.controllers.EditorController">
+    <left>
+        <VBox prefHeight="373.0" prefWidth="0.0" styleClass="icon-bar" stylesheets="@../css/main.css"
+              BorderPane.alignment="CENTER">
+            <children>
+                <Button fx:id="explorerBtn" mnemonicParsing="false" onAction="#handleButtonClick" prefHeight="26.0"
+                        prefWidth="54.0" styleClass="icon-button">
+                    <graphic>
+                        <ImageView fitHeight="17.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../icons/folder.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button fx:id="searchBtn" mnemonicParsing="false" onAction="#handleButtonClick" prefHeight="28.0"
+                        prefWidth="62.0" styleClass="icon-button">
+                    <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../icons/search.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button fx:id="toolsBtn" mnemonicParsing="false" onAction="#handleButtonClick" prefHeight="27.0"
+                        prefWidth="113.0" styleClass="icon-button">
+                    <graphic>
+                        <ImageView fitHeight="19.0" fitWidth="21.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../icons/category.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Region prefHeight="277.0" prefWidth="44.0" VBox.vgrow="ALWAYS"/>
+                <Button mnemonicParsing="false" prefHeight="27.0" prefWidth="113.0" styleClass="icon-button">
+                    <graphic>
+                        <ImageView fitHeight="19.0" fitWidth="21.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../icons/setting.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <SplitPane fx:id="leftSplitPane" dividerPositions="0.23042168674698796" prefHeight="444.0" prefWidth="605.0"
+                   stylesheets="@../css/main.css" BorderPane.alignment="CENTER">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="595.0" prefWidth="235.0" styleClass="left-panel"
+                            SplitPane.resizableWithParent="false">
+                    <children>
+                        <AnchorPane fx:id="explorerPanel" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox fx:id="explorerHeaderHBox" prefHeight="30.0" prefWidth="230.0">
+                                            <children>
+                                                <Label prefHeight="26.0" prefWidth="88.0" text="EXPLORER"
+                                                       textFill="WHITE"/>
+                                                <Pane HBox.hgrow="ALWAYS"/>
+                                                <MenuButton ellipsisString="" mnemonicParsing="false" prefHeight="27.0"
+                                                            prefWidth="45.0" styleClass="more-button" text="•••"
+                                                            textFill="WHITE">
+                                                    <items>
+                                                        <MenuItem mnemonicParsing="false" text="Action 1"/>
+                                                        <MenuItem mnemonicParsing="false" text="Action 2"/>
+                                                    </items>
+                                                </MenuButton>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </HBox>
+                                        <StackPane prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <VBox fx:id="emptyExplorerMessage" prefHeight="200.0" prefWidth="100.0"
+                                                      spacing="15.0" styleClass="center-top-box" visible="false"
+                                                      StackPane.alignment="CENTER">
+                                                    <children>
+                                                        <Label text="You have not yet opened a folder."
+                                                               textFill="WHITE"/>
+                                                        <Button fx:id="btnOpenFolder" mnemonicParsing="false"
+                                                                onAction="#handleOpenFolder" styleClass="custom-button"
+                                                                text="Open Folder" VBox.vgrow="ALWAYS"/>
+                                                        <Label text="You can clone a repository locally."
+                                                               textFill="WHITE"/>
+                                                        <Button fx:id="btnCloneRepository" mnemonicParsing="false"
+                                                                onAction="#handleCloneRepository"
+                                                                styleClass="custom-button"
+                                                                text="Clone Repository"/>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                                    </padding>
+                                                </VBox>
+                                                <TreeView fx:id="explorer" prefHeight="269.0" prefWidth="229.0"/>
+                                            </children>
+                                        </StackPane>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="searchPanel" visible="false" AnchorPane.bottomAnchor="0.0"
+                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <VBox prefHeight="526.0" prefWidth="230.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox fx:id="searchHeaderHBox" prefHeight="30.0" prefWidth="230.0">
+                                            <children>
+                                                <Label prefHeight="26.0" prefWidth="117.0" text="SEARCH"
+                                                       textFill="WHITE"/>
+                                                <Pane HBox.hgrow="ALWAYS"/>
+                                                <MenuButton ellipsisString="" mnemonicParsing="false" prefHeight="27.0"
+                                                            prefWidth="45.0" styleClass="more-button" text="•••"
+                                                            textFill="WHITE">
+                                                    <items>
+                                                        <MenuItem mnemonicParsing="false" text="Action 1"/>
+                                                        <MenuItem mnemonicParsing="false" text="Action 2"/>
+                                                    </items>
+                                                </MenuButton>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </HBox>
+                                        <AnchorPane>
+                                            <children>
+                                                <TextField prefHeight="32.0" prefWidth="202.0"
+                                                           promptText="Search (Ctrl + F)" styleClass="search"
+                                                           AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
+                                                           AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0"/>
+                                                <ImageView fitHeight="21.0" fitWidth="27.0" layoutX="14.0"
+                                                           layoutY="16.0" pickOnBounds="true" preserveRatio="true"
+                                                           AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
+                                                    <image>
+                                                        <Image url="@../icons/search.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </AnchorPane>
+                                        <ListView VBox.vgrow="ALWAYS"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="sourceControlPanel" visible="false" AnchorPane.bottomAnchor="0.0"
+                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox fx:id="sourceControlHeaderHBox" prefHeight="30.0" prefWidth="230.0">
+                                            <children>
+                                                <Label prefHeight="26.0" prefWidth="131.0" text="SOURCE CONTROL"
+                                                       textFill="WHITE"/>
+                                                <Pane HBox.hgrow="ALWAYS"/>
+                                                <MenuButton ellipsisString="" mnemonicParsing="false" prefHeight="28.0"
+                                                            prefWidth="45.0" styleClass="more-button" text="&#8226;&#8226;&#8226;"
+                                                            textFill="WHITE">
+                                                    <items>
+                                                        <MenuItem mnemonicParsing="false" text="Folders"/>
+                                                        <MenuItem mnemonicParsing="false" text="Action 2"/>
+                                                    </items>
+                                                </MenuButton>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </HBox>
+                                        <ListView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" styleClass="right-panel">
+                    <children>
+                        <SplitPane fx:id="rightSplitPane" dividerPositions="0.6368563685636857" orientation="VERTICAL"
+                                   styleClass="right-panel"
+                                   stylesheets="@../css/main.css" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                    <children>
+                                        <CodeArea fx:id="codeEditor" layoutX="74.0" layoutY="57.0" visible="false"
+                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                        <HBox AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                              AnchorPane.topAnchor="0.0">
+                                            <children>
+                                                <TabPane fx:id="editorTabPane" prefHeight="45.0"
+                                                         tabClosingPolicy="ALL_TABS" HBox.hgrow="ALWAYS"
+                                                         maxWidth="Infinity">
+                                                    <tabs>
+                                                        <Tab fx:id="welcomeTab" text="Welcome">
+                                                            <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0"
+                                                                            prefHeight="180.0" prefWidth="200.0">
+                                                                    <children>
+                                                                        <Label layoutX="110.0" layoutY="142.0"
+                                                                               text="Editing Evolved" textFill="WHITE">
+                                                                            <font>
+                                                                                <Font size="18.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <HBox layoutX="108.0" layoutY="74.0"
+                                                                              prefHeight="52.0" prefWidth="252.0">
+                                                                            <children>
+                                                                                <ImageView fitHeight="52.0"
+                                                                                           fitWidth="200.0"
+                                                                                           pickOnBounds="true"
+                                                                                           preserveRatio="true">
+                                                                                    <image>
+                                                                                        <Image url="@../icons/logo.png"/>
+                                                                                    </image>
+                                                                                </ImageView>
+                                                                                <Label prefHeight="49.0"
+                                                                                       prefWidth="202.0"
+                                                                                       text="AutómataLab"
+                                                                                       textFill="WHITE">
+                                                                                    <font>
+                                                                                        <Font size="24.0"/>
+                                                                                    </font>
+                                                                                </Label>
+                                                                            </children>
+                                                                        </HBox>
+                                                                        <VBox layoutX="110.0" layoutY="175.0"
+                                                                              prefHeight="47.0" prefWidth="128.0">
+                                                                            <children>
+                                                                                <Label prefHeight="30.0"
+                                                                                       prefWidth="135.0" text="Start"
+                                                                                       textFill="WHITE"/>
+                                                                                <Hyperlink text="New File">
+                                                                                    <graphic>
+                                                                                        <ImageView fitHeight="23.0"
+                                                                                                   fitWidth="22.0"
+                                                                                                   pickOnBounds="true"
+                                                                                                   preserveRatio="true">
+                                                                                            <image>
+                                                                                                <Image url="@../icons/new-file.png"/>
+                                                                                            </image>
+                                                                                        </ImageView>
+                                                                                    </graphic>
+                                                                                </Hyperlink>
+                                                                                <Hyperlink text="Open File">
+                                                                                    <graphic>
+                                                                                        <ImageView fitHeight="23.0"
+                                                                                                   fitWidth="22.0"
+                                                                                                   pickOnBounds="true"
+                                                                                                   preserveRatio="true">
+                                                                                            <image>
+                                                                                                <Image url="@../icons/open-document.png"/>
+                                                                                            </image>
+                                                                                        </ImageView>
+                                                                                    </graphic>
+                                                                                </Hyperlink>
+                                                                                <Hyperlink text="Open Folder">
+                                                                                    <graphic>
+                                                                                        <ImageView fitHeight="23.0"
+                                                                                                   fitWidth="22.0"
+                                                                                                   pickOnBounds="true"
+                                                                                                   preserveRatio="true">
+                                                                                            <image>
+                                                                                                <Image url="@../icons/open-folder.png"/>
+                                                                                            </image>
+                                                                                        </ImageView>
+                                                                                    </graphic>
+                                                                                </Hyperlink>
+                                                                            </children>
+                                                                        </VBox>
+                                                                        <VBox layoutX="483.0" layoutY="174.0"
+                                                                              prefHeight="105.0" prefWidth="141.0">
+                                                                            <children>
+                                                                                <Label prefHeight="0.0"
+                                                                                       prefWidth="170.0" text="Recent"
+                                                                                       textFill="WHITE"/>
+                                                                            </children>
+                                                                        </VBox>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            </content>
+                                                        </Tab>
+                                                    </tabs>
+                                                </TabPane>
+                                                <HBox alignment="CENTER_RIGHT" spacing="5.0" minWidth="-Infinity">
+                                                    <padding>
+                                                        <Insets top="0.0" right="10.0" bottom="0.0" left="10.0"/>
+                                                    </padding>
+                                                    <children>
+                                                        <CustomSplitMenuButton fx:id="runSplitButton"
+                                                                               onAction="#handleRunAction"
+                                                                               dropdownIconPath="chevron-down.svg">
+                                                            <graphic>
+                                                                <SVGImageView svgPath="play.svg" fitWidth="14"
+                                                                              fitHeight="14" pickOnBounds="true"
+                                                                              preserveRatio="true"/>
+                                                            </graphic>
+                                                            <items>
+                                                                <MenuItem text="Run Current File"/>
+                                                                <MenuItem text="Run All Files"/>
+                                                                <MenuItem text="Debug"/>
+                                                            </items>
+                                                            <tooltip>
+                                                                <Tooltip text="Run options (F5)"/>
+                                                            </tooltip>
+                                                        </CustomSplitMenuButton>
+
+                                                        <Region prefWidth="10"/>
+                                                        <Button fx:id="splitBtn" mnemonicParsing="false"
+                                                                styleClass="svg-button">
+                                                            <graphic>
+                                                                <SVGImageView svgPath="square-split-horizontal.svg"
+                                                                              fitWidth="16" fitHeight="16"
+                                                                              pickOnBounds="true" preserveRatio="true"/>
+                                                            </graphic>
+                                                            <tooltip>
+                                                                <Tooltip text="Split Editor"/>
+                                                            </tooltip>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </HBox>
+                                        <AnchorPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                    AnchorPane.topAnchor="45.0" AnchorPane.bottomAnchor="0.0">
+                                            <StackPane fx:id="tabContentArea" AnchorPane.bottomAnchor="0.0"
+                                                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                       AnchorPane.topAnchor="0.0"/>
+                                        </AnchorPane>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane fx:id="terminalPanel" minHeight="0.0" minWidth="0.0" prefHeight="108.0"
+                                            prefWidth="436.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" styleClass="terminal-hbox"
+                                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                              AnchorPane.topAnchor="0.0">
+                                            <ToggleButton text="PROBLEMS" styleClass="tab-button">
+                                                <toggleGroup>
+                                                    <ToggleGroup fx:id="tabGroup"/>
+                                                </toggleGroup>
+                                            </ToggleButton>
+
+                                            <ToggleButton text="OUTPUT" styleClass="tab-button"
+                                                          toggleGroup="$tabGroup"/>
+
+                                            <ToggleButton text="DEBUG CONSOLE" styleClass="tab-button"
+                                                          toggleGroup="$tabGroup"/>
+
+                                            <ToggleButton text="TERMINAL" styleClass="tab-button" selected="true"
+                                                          toggleGroup="$tabGroup"/>
+
+                                            <ToggleButton text="REPORTS" styleClass="tab-button"
+                                                          toggleGroup="$tabGroup"/>
+
+                                            <Region HBox.hgrow="ALWAYS"/>
+
+
+                                            <Button styleClass="terminal-button">
+                                                <graphic>
+                                                    <SVGImageView svgPath="square-terminal.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Terminal"/>
+                                                </tooltip>
+                                            </Button>
+
+                                            <Button styleClass="terminal-button">
+                                                <graphic>
+                                                    <SVGImageView svgPath="plus.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="New Terminal"/>
+                                                </tooltip>
+                                            </Button>
+
+                                            <Button fx:id="btnSplitTerminal" styleClass="terminal-button">
+                                                <graphic>
+                                                    <SVGImageView svgPath="square-split-horizontal.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Split Terminal"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="btnDeleteTerminal" styleClass="terminal-button">
+                                                <graphic>
+                                                    <SVGImageView svgPath="trash-2.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Kill Terminal"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="btnMore" styleClass="terminal-button">
+                                                <graphic>
+                                                    <SVGImageView svgPath="ellipsis.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Views and More Actios"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="btnMaximizePanel" styleClass="terminal-button"
+                                                    onAction="#handleMaximizePanel">
+                                                <graphic>
+                                                    <SVGImageView svgPath="chevron-up.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Maximize Panel"/>
+                                                </tooltip>
+                                            </Button>
+
+                                            <Button fx:id="btnMinimizePanel" styleClass="terminal-button"
+                                                    onAction="#handleMinimizePanel">
+                                                <graphic>
+                                                    <SVGImageView svgPath="chevron-down.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Minimize Panel"/>
+                                                </tooltip>
+                                            </Button>
+
+                                            <Button fx:id="btnClosePanel" styleClass="terminal-button"
+                                                    onAction="#handleClosePanel">
+                                                <graphic>
+                                                    <SVGImageView svgPath="x.svg" fitWidth="14"
+                                                                  fitHeight="14" pickOnBounds="true"
+                                                                  preserveRatio="true"/>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip text="Close Panel"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+
+                                        <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                            <TextArea fx:id="problemsPanel" editable="false"
+                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                                      visible="false"/>
+
+                                            <TextArea fx:id="outputPanel" editable="false"
+                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                                      visible="false"/>
+
+                                            <TextArea fx:id="debugConsolePanel" editable="false"
+                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                                      visible="false"/>
+
+                                            <Terminal fx:id="terminal"/>
+
+                                            <TextArea fx:id="reportsPanel" editable="false"
+                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                                      visible="false"/>
+                                        </StackPane>
+                                    </children>
+                                </AnchorPane>
+                            </items>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+
+    </center>
+    <top>
+        <HBox fx:id="titleBar" prefHeight="30.0" prefWidth="1059.0" styleClass="title-bar"
+              stylesheets="@../css/main.css" BorderPane.alignment="CENTER">
+            <children>
+                <MenuBar prefHeight="32.0" HBox.hgrow="SOMETIMES">
+                    <menus>
+                        <Menu mnemonicParsing="false">
+                            <graphic>
+                                <ImageView fitHeight="27.0" fitWidth="20.0" pickOnBounds="true"
+                                           preserveRatio="true">
+                                    <image>
+                                        <Image url="@../icons/logo.png"/>
+                                    </image>
+                                </ImageView>
+                            </graphic>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="File">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="New Text File" accelerator="Shortcut+N"/>
+                                <MenuItem mnemonicParsing="false" text="New File..." accelerator="Shortcut+Alt+N"/>
+                                <MenuItem mnemonicParsing="false" text="New Window" accelerator="Shortcut+Shift+N"/>
+                                <Menu mnemonicParsing="false" text="New Window with Profile">
+                                    <!-- Subelementos aquí -->
+                                </Menu>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" text="Open File..." accelerator="Shortcut+O"/>
+                                <MenuItem mnemonicParsing="false" text="Open Folder..." accelerator="Shortcut+K"/>
+                                <MenuItem mnemonicParsing="false" text="Open Workspace from File..."/>
+                                <Menu mnemonicParsing="false" text="Open Recent">
+                                    <!-- Elementos recientes aquí -->
+                                </Menu>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+
+                                <MenuItem mnemonicParsing="false" text="Add Folder to Workspace..."/>
+                                <MenuItem mnemonicParsing="false" text="Save Workspace As..."/>
+                                <MenuItem mnemonicParsing="false" text="Duplicate Workspace"/>
+
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" text="Save" accelerator="Shortcut+S"/>
+                                <MenuItem mnemonicParsing="false" text="Save As..." accelerator="Shortcut+Shift+S"/>
+                                <MenuItem mnemonicParsing="false" text="Save All"/>
+
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <Menu mnemonicParsing="false" text="Share">
+                                    <!-- Subelementos para compartir -->
+                                </Menu>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+
+                                <MenuItem mnemonicParsing="false" text="Auto Save"/>
+                                <Menu mnemonicParsing="false" text="Preferences">
+                                    <!-- Subelementos de preferencias -->
+                                </Menu>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+
+                                <MenuItem mnemonicParsing="false" text="Revert File"/>
+                                <MenuItem mnemonicParsing="false" text="Close Editor" accelerator="Shortcut+W"/>
+                                <MenuItem mnemonicParsing="false" text="Close Folder" accelerator="Shortcut+F"/>
+                                <MenuItem mnemonicParsing="false" text="Close Window" accelerator="Alt+F4"/>
+
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+
+                                <MenuItem mnemonicParsing="false" text="Exit" accelerator="Shortcut+Q"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Edit">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Undo" accelerator="Shortcut+Z"/>
+                                <MenuItem mnemonicParsing="false" text="Redo" accelerator="Shortcut+Y"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem mnemonicParsing="false" text="Cut" accelerator="Shortcut+X"/>
+                                <MenuItem mnemonicParsing="false" text="Copy" accelerator="Shortcut+C"/>
+                                <MenuItem mnemonicParsing="false" text="Paste" accelerator="Shortcut+V"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem mnemonicParsing="false" text="Find" accelerator="Shortcut+F"/>
+                                <MenuItem mnemonicParsing="false" text="Replace" accelerator="Shortcut+H"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem mnemonicParsing="false" text="Find in Files"
+                                          accelerator="Shortcut+Shift+F"/>
+                                <MenuItem mnemonicParsing="false" text="Replace in Files"
+                                          accelerator="Shortcut+Shift+H"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem mnemonicParsing="false" text="Toggle Line Comment"
+                                          accelerator="Shortcut+7"/>
+                                <MenuItem mnemonicParsing="false" text="Toggle Block Comment"
+                                          accelerator="Shortcut+Shift+A"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem mnemonicParsing="false" text="Emmet: Expand Abbreviation"
+                                          accelerator="Tab"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Selection">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Select All" accelerator="Shortcut+A"/>
+                                <MenuItem mnemonicParsing="false" text="Expand Selection"
+                                          accelerator="Shift+Alt+Right"/>
+                                <MenuItem mnemonicParsing="false" text="Shrink Selection"
+                                          accelerator="Shift+Alt+Left"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Copy Line Up"
+                                          accelerator="Ctrl+Shift+Alt+Up"/>
+                                <MenuItem mnemonicParsing="false" text="Copy Line Down"
+                                          accelerator="Ctrl+Shift+Alt+Down"/>
+                                <MenuItem mnemonicParsing="false" text="Move Line Up" accelerator="Alt+Up"/>
+                                <MenuItem mnemonicParsing="false" text="Move Line Down" accelerator="Alt+Down"/>
+                                <MenuItem mnemonicParsing="false" text="Duplicate Selection"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Add Cursor Above"
+                                          accelerator="Shift+Alt+Up"/>
+                                <MenuItem mnemonicParsing="false" text="Add Cursor Below"
+                                          accelerator="Shift+Alt+Down"/>
+                                <MenuItem mnemonicParsing="false" text="Add Cursors to Line Ends"
+                                          accelerator="Shift+Alt+I"/>
+                                <MenuItem mnemonicParsing="false" text="Add Next Occurrence" accelerator="Ctrl+D"/>
+                                <MenuItem mnemonicParsing="false" text="Add Previous Occurrence"/>
+                                <MenuItem mnemonicParsing="false" text="Select All Occurrences"
+                                          accelerator="Ctrl+Shift+L"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Switch to Ctrl+Click for Multi-Cursor"/>
+                                <MenuItem mnemonicParsing="false" text="Column Selection Mode"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="View">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Command Palette..."
+                                          accelerator="Ctrl+Shift+P"/>
+                                <MenuItem mnemonicParsing="false" text="Open View..."/>
+                                <SeparatorMenuItem/>
+
+                                <Menu mnemonicParsing="false" text="Appearance">
+                                    <!-- Submenú de Apariencia -->
+                                </Menu>
+                                <Menu mnemonicParsing="false" text="Editor Layout">
+                                    <!-- Submenú de Layout -->
+                                </Menu>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Explorer" accelerator="Ctrl+Shift+E"/>
+                                <MenuItem mnemonicParsing="false" text="Search" accelerator="Ctrl+Shift+F"/>
+                                <MenuItem mnemonicParsing="false" text="Source Control" accelerator="Ctrl+Shift+G"/>
+                                <MenuItem mnemonicParsing="false" text="Run" accelerator="Ctrl+Shift+D"/>
+                                <MenuItem mnemonicParsing="false" text="Extensions" accelerator="Ctrl+Shift+X"/>
+                                <MenuItem mnemonicParsing="false" text="Testing"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Chat" accelerator="Ctrl+Alt+I"/>
+                                <MenuItem mnemonicParsing="false" text="Copilot Edits"
+                                          accelerator="Ctrl+Shift+Alt+I"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Problems" accelerator="Ctrl+Shift+M"/>
+                                <MenuItem mnemonicParsing="false" text="Output" accelerator="Ctrl+K"/>
+                                <MenuItem mnemonicParsing="false" text="Debug Console" accelerator="Ctrl+Shift+Y"/>
+                                <MenuItem mnemonicParsing="false" text="Terminal"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Word Wrap" accelerator="Alt+Z"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Go">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Back" accelerator="Ctrl+Alt+-"/>
+                                <MenuItem mnemonicParsing="false" text="Forward" accelerator="Ctrl+Shift+-"
+                                          disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Last Edit Location"
+                                          accelerator="Ctrl+Q" disable="true"/>
+                                <SeparatorMenuItem/>
+
+                                <Menu mnemonicParsing="false" text="Switch Editor">
+                                    <!-- Submenú para cambiar de editor -->
+                                </Menu>
+                                <Menu mnemonicParsing="false" text="Switch Group">
+                                    <!-- Submenú para cambiar de grupo -->
+                                </Menu>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Go to File..." accelerator="Ctrl+P"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Symbol in Workspace..."
+                                          accelerator="Ctrl+T"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Go to Symbol in Editor..."
+                                          accelerator="Ctrl+Shift+O"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Definition" accelerator="F12"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Declaration"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Type Definition"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Implementations"
+                                          accelerator="Ctrl+F12"/>
+                                <MenuItem mnemonicParsing="false" text="Go to References" accelerator="Shift+F12"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Go to Line/Column..." accelerator="Ctrl+G"/>
+                                <MenuItem mnemonicParsing="false" text="Go to Bracket" accelerator="Ctrl+|"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Next Problem" accelerator="F8"/>
+                                <MenuItem mnemonicParsing="false" text="Previous Problem" accelerator="Shift+F8"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Next Change" accelerator="Alt+F3"/>
+                                <MenuItem mnemonicParsing="false" text="Previous Change"
+                                          accelerator="Shift+Alt+F3"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Run">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Start Debugging" accelerator="F5"/>
+                                <MenuItem mnemonicParsing="false" text="Run Without Debugging"
+                                          accelerator="Ctrl+F5"/>
+                                <MenuItem mnemonicParsing="false" text="Stop Debugging" accelerator="Shift+F5"
+                                          disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Restart Debugging"
+                                          accelerator="Ctrl+Shift+F5"
+                                          disable="true"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Open Configurations"/>
+                                <MenuItem mnemonicParsing="false" text="Add Configuration..."/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Step Over" accelerator="F10"
+                                          disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Step Into" accelerator="F11"
+                                          disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Step Out" accelerator="Shift+F11"
+                                          disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Continue" accelerator="F5" disable="true"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Toggle Breakpoint" accelerator="F9"/>
+                                <Menu mnemonicParsing="false" text="New Breakpoint">
+                                    <!-- Submenú para agregar breakpoints -->
+                                </Menu>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Enable All Breakpoints"/>
+                                <MenuItem mnemonicParsing="false" text="Disable All Breakpoints"/>
+                                <MenuItem mnemonicParsing="false" text="Remove All Breakpoints"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Install Additional Debuggers..."/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Terminal">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="New Terminal"/>
+                                <MenuItem mnemonicParsing="false" text="Split Terminal" accelerator="Ctrl+Shift+5"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Run Task..."/>
+                                <MenuItem mnemonicParsing="false" text="Run Build Task..."
+                                          accelerator="Ctrl+Shift+B"/>
+                                <MenuItem mnemonicParsing="false" text="Run Active File"/>
+                                <MenuItem mnemonicParsing="false" text="Run Selected Text"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Show Running Tasks..." disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Restart Running Task..." disable="true"/>
+                                <MenuItem mnemonicParsing="false" text="Terminate Task..." disable="true"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Configure Tasks..."/>
+                                <MenuItem mnemonicParsing="false" text="Configure Default Build Task..."/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Help">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Welcome"/>
+                                <MenuItem mnemonicParsing="false" text="Show All Commands"
+                                          accelerator="Ctrl+Shift+P"/>
+                                <MenuItem mnemonicParsing="false" text="Documentation"/>
+                                <MenuItem mnemonicParsing="false" text="Editor Playground"/>
+                                <MenuItem mnemonicParsing="false" text="Show Release Notes"/>
+                                <MenuItem mnemonicParsing="false" text="Get Started with Accessibility Features"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Keyboard Shortcuts Reference"
+                                          accelerator="Ctrl+R"/>
+                                <MenuItem mnemonicParsing="false" text="Video Tutorials"/>
+                                <MenuItem mnemonicParsing="false" text="Tips and Tricks"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Join Us on YouTube"/>
+                                <MenuItem mnemonicParsing="false" text="Search Feature Requests"/>
+                                <MenuItem mnemonicParsing="false" text="Report Issue"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="View License"/>
+                                <MenuItem mnemonicParsing="false" text="Privacy Statement"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Toggle Developer Tools"/>
+                                <MenuItem mnemonicParsing="false" text="Open Process Explorer"/>
+                                <SeparatorMenuItem/>
+
+                                <MenuItem mnemonicParsing="false" text="Download Update"/>
+                                <MenuItem mnemonicParsing="false" text="About"/>
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+
+                <BorderPane HBox.hgrow="ALWAYS">
+                    <center>
+                        <Label alignment="CENTER" styleClass="title-label"
+                               text="Ricardious"
+                               maxWidth="300" textAlignment="CENTER"/>
+                    </center>
+                </BorderPane>
+
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox prefHeight="30.0" prefWidth="80.0" HBox.hgrow="NEVER">
+                    <children>
+                        <Button fx:id="btnMin" mnemonicParsing="false" prefHeight="66.0" prefWidth="51.0"
+                                styleClass="window-btn">
+                            <graphic>
+                                <ImageView fitHeight="2.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../icons/minimize.png"/>
+                                    </image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnRest" mnemonicParsing="false" prefHeight="64.0" prefWidth="44.0"
+                                styleClass="window-btn">
+                            <graphic>
+                                <ImageView fitHeight="10.0" fitWidth="15.0" pickOnBounds="true"
+                                           preserveRatio="true">
+                                    <image>
+                                        <Image url="@../icons/maximize.png"/>
+                                    </image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnClose" mnemonicParsing="false" prefHeight="65.0" prefWidth="233.0"
+                                styleClass="window-btn">
+                            <graphic>
+                                <ImageView fitHeight="9.0" fitWidth="11.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../icons/close.png"/>
+                                    </image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+    </top>
+</BorderPane>
