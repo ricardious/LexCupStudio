@@ -42,12 +42,20 @@ mvn -pl example-language -am test
 ## Ejecutar UI con plugin
 
 ```bash
-mvn -pl ui-shell -am test -DskipTests
-mvn -pl ui-shell -am org.openjfx:javafx-maven-plugin:0.0.8:run
+./run-ui.sh
 ```
 
 La UI consume implementaciones de `LanguageRuntimePlugin` vía `ServiceLoader`.
 Para integrar otra lógica, crea un módulo que implemente `ui-api` y registra el provider en `META-INF/services`.
+
+### Plugin propio (resumen)
+
+1. Crea un módulo nuevo (ej. `plugin-mi-lenguaje`).
+2. Agrega dependencia a `lexcupstudio-ui-api`.
+3. Implementa `LanguageRuntimePlugin`.
+4. Registra la implementación en:
+   `src/main/resources/META-INF/services/io.lexcupstudio.ui.api.LanguageRuntimePlugin`
+5. Agrega tu módulo al `pom.xml` padre y ejecuta `./run-ui.sh`.
 
 ## Generar proyecto desde archetype
 
