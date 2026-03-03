@@ -72,3 +72,7 @@ mvn archetype:generate \
   -DlexcupstudioVersion=0.1.0 \
   -DinteractiveMode=false
 ```
+
+## Documentación de plugins
+
+Guía completa: [docs/PLUGIN_GUIDE.md](/home/ricardious/IdeaProjects/LexCupStudio/docs/PLUGIN_GUIDE.md)
