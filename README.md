@@ -57,6 +57,20 @@ Para integrar otra lógica, crea un módulo que implemente `ui-api` y registra e
    `src/main/resources/META-INF/services/io.lexcupstudio.ui.api.LanguageRuntimePlugin`
 5. Agrega tu módulo al `pom.xml` padre y ejecuta `./run-ui.sh`.
 
+## Branding rapido (nombre y logo)
+
+Edita:
+
+`ui-shell/src/main/resources/edu/usac/olc1/olc1_proyecto1/branding.properties`
+
+```properties
+app.name=LexCupStudio
+app.logo.path=/edu/usac/olc1/olc1_proyecto1/icons/logo.png
+```
+
+- `app.name`: nombre que aparece en la ventana principal, portada y mensajes de salida.
+- `app.logo.path`: ruta absoluta dentro de recursos del `ui-shell`.
+
 ## Generar proyecto desde archetype
 
 ```bash

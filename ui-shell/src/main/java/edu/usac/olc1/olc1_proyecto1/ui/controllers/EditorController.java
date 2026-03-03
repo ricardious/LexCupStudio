@@ -6,6 +6,7 @@ import edu.usac.olc1.olc1_proyecto1.ui.managers.AutoCompletionManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.FileManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.SyntaxHighlightingManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.TabManager;
+import edu.usac.olc1.olc1_proyecto1.ui.utils.BrandingConfig;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.ResourceManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.WindowDragger;
 
@@ -119,6 +120,18 @@ public class EditorController implements Initializable {
     @FXML
     private Button btnCloneRepository;
 
+    @FXML
+    private Label welcomeAppNameLabel;
+
+    @FXML
+    private Label appTitleLabel;
+
+    @FXML
+    private ImageView welcomeLogoImageView;
+
+    @FXML
+    private ImageView titleBarLogoImageView;
+
     private boolean isMaximized = false;
     private double lastDividerPosition;
     private File selectedDirectory;
@@ -147,6 +160,7 @@ public class EditorController implements Initializable {
         tabManager = new TabManager(editorTabPane, tabContentArea);
 
         tabManager.registerTab(welcomeTab, welcomeContent);
+        applyBranding();
 
         codeEditor.setParagraphGraphicFactory(LineNumberFactory.get(codeEditor));
         syntaxHighlightingManager.bind(codeEditor);
@@ -205,6 +219,28 @@ public class EditorController implements Initializable {
         );
 
 
+    }
+
+    private void applyBranding() {
+        String appName = BrandingConfig.getAppName();
+        Image logo = BrandingConfig.getLogoImage();
+
+        if (welcomeAppNameLabel != null) {
+            welcomeAppNameLabel.setText(appName);
+        }
+
+        if (appTitleLabel != null) {
+            appTitleLabel.setText(appName);
+        }
+
+        if (logo != null) {
+            if (welcomeLogoImageView != null) {
+                welcomeLogoImageView.setImage(logo);
+            }
+            if (titleBarLogoImageView != null) {
+                titleBarLogoImageView.setImage(logo);
+            }
+        }
     }
 
     private void initializePanelButtons() {

@@ -1,11 +1,13 @@
 package edu.usac.olc1.olc1_proyecto1;
 
 import edu.usac.olc1.olc1_proyecto1.ui.utils.Fonts;
+import edu.usac.olc1.olc1_proyecto1.ui.utils.BrandingConfig;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.Styles;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -25,7 +27,11 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(Styles.forName("main.css"));
         stage.setScene(scene);
-        stage.setTitle("Code Editor");
+        stage.setTitle(BrandingConfig.getAppName());
+        Image appLogo = BrandingConfig.getLogoImage();
+        if (appLogo != null) {
+            stage.getIcons().add(appLogo);
+        }
         stage.initStyle(StageStyle.UNDECORATED);
 
         stage.show();

@@ -259,7 +259,7 @@
                                                                         <HBox layoutX="108.0" layoutY="74.0"
                                                                               prefHeight="52.0" prefWidth="252.0">
                                                                             <children>
-                                                                                <ImageView fitHeight="52.0"
+                                                                                <ImageView fx:id="welcomeLogoImageView" fitHeight="52.0"
                                                                                            fitWidth="200.0"
                                                                                            pickOnBounds="true"
                                                                                            preserveRatio="true">
@@ -267,9 +267,9 @@
                                                                                         <Image url="@../icons/logo.png"/>
                                                                                     </image>
                                                                                 </ImageView>
-                                                                                <Label prefHeight="49.0"
+                                                                                <Label fx:id="welcomeAppNameLabel" prefHeight="49.0"
                                                                                        prefWidth="202.0"
-                                                                                       text="AutómataLab"
+                                                                                       text="LexCupStudio"
                                                                                        textFill="WHITE">
                                                                                     <font>
                                                                                         <Font size="24.0"/>
@@ -536,7 +536,7 @@
                     <menus>
                         <Menu mnemonicParsing="false">
                             <graphic>
-                                <ImageView fitHeight="27.0" fitWidth="20.0" pickOnBounds="true"
+                                <ImageView fx:id="titleBarLogoImageView" fitHeight="27.0" fitWidth="20.0" pickOnBounds="true"
                                            preserveRatio="true">
                                     <image>
                                         <Image url="@../icons/logo.png"/>
@@ -834,8 +834,8 @@
 
                 <BorderPane HBox.hgrow="ALWAYS">
                     <center>
-                        <Label alignment="CENTER" styleClass="title-label"
-                               text="Ricardious"
+                        <Label fx:id="appTitleLabel" alignment="CENTER" styleClass="title-label"
+                               text="LexCupStudio"
                                maxWidth="300" textAlignment="CENTER"/>
                     </center>
                 </BorderPane>
