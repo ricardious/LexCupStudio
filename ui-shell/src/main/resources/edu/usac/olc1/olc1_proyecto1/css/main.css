@@ -696,27 +696,27 @@
 }
 
 .code-area .syntax-keyword {
-    -fx-fill: #4FC1FF;
+    -fx-fill: #F767BB;
     -fx-font-weight: bold;
 }
 
 .code-area .syntax-string {
-    -fx-fill: #CE9178;
+    -fx-fill: #2DAE58;
 }
 
 .code-area .syntax-comment {
-    -fx-fill: #6A9955;
+    -fx-fill: #9194A2;
     -fx-font-style: italic;
 }
 
 .code-area .syntax-number {
-    -fx-fill: #B5CEA8;
+    -fx-fill: #CF9C00;
 }
 
 .code-area .syntax-operator {
-    -fx-fill: #D4D4D4;
+    -fx-fill: #13BBB7;
 }
 
 .code-area .syntax-delimiter {
-    -fx-fill: #C586C0;
+    -fx-fill: #09A1ED;
 }
