@@ -43,11 +43,11 @@ mvn install -DskipTests
 mvn archetype:generate \
   -DarchetypeGroupId=io.lexcupstudio \
   -DarchetypeArtifactId=lexcupstudio-example-language-archetype \
-  -DarchetypeVersion=0.1.0-SNAPSHOT \
+  -DarchetypeVersion=0.1.0 \
   -DgroupId=com.myteam \
   -DartifactId=my-language \
-  -Dversion=0.1.0-SNAPSHOT \
+  -Dversion=0.1.0 \
   -Dpackage=com.myteam.language \
-  -DlexcupstudioVersion=0.1.0-SNAPSHOT \
+  -DlexcupstudioVersion=0.1.0 \
   -DinteractiveMode=false
 ```
