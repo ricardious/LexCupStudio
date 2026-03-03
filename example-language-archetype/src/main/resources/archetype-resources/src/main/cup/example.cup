@@ -1,0 +1,38 @@
+package ${package}.generated;
+
+import io.lexcupstudio.core.FrontendMessage;
+import java.util.ArrayList;
+import java.util.List;
+
+parser code {:
+    private final List<FrontendMessage> messages = new ArrayList<>();
+
+    public List<FrontendMessage> getMessages() {
+        return messages;
+    }
+
+    @Override
+    public void report_error(String message, Object info) {
+        int line = 0;
+        int column = 0;
+        if (info instanceof java_cup.runtime.Symbol symbol) {
+            line = symbol.left;
+            column = symbol.right;
+        }
+        messages.add(FrontendMessage.error(message, line, column));
+    }
+:};
+
+terminal Integer NUMBER;
+terminal PLUS, MINUS, LPAREN, RPAREN;
+non terminal Integer expr;
+
+precedence left PLUS, MINUS;
+
+start with expr;
+
+expr ::= expr:l PLUS expr:r {: RESULT = l + r; :}
+       | expr:l MINUS expr:r {: RESULT = l - r; :}
+       | LPAREN expr:e RPAREN {: RESULT = e; :}
+       | NUMBER:n {: RESULT = n; :}
+       ;

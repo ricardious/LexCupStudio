@@ -15,6 +15,7 @@
         <module>core</module>
         <module>starter</module>
         <module>example-language</module>
+        <module>example-language-archetype</module>
     </modules>
 
     <properties>

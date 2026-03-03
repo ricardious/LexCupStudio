@@ -15,6 +15,7 @@ Que cualquier proyecto nuevo pueda:
 - `core/`: contratos y pipeline reutilizable.
 - `starter/`: plantillas `.flex` / `.cup` y utilidades de arranque.
 - `example-language/`: ejemplo funcional con generación JFlex + CUP y adapters reales.
+- `example-language-archetype/`: generador Maven para crear un proyecto base listo.
 
 ## Uso rápido
 
@@ -33,4 +34,20 @@ mvn clean test
 
 ```bash
 mvn -pl example-language -am test
+```
+
+## Generar proyecto desde archetype
+
+```bash
+mvn install -DskipTests
+mvn archetype:generate \
+  -DarchetypeGroupId=io.lexcupstudio \
+  -DarchetypeArtifactId=lexcupstudio-example-language-archetype \
+  -DarchetypeVersion=0.1.0-SNAPSHOT \
+  -DgroupId=com.myteam \
+  -DartifactId=my-language \
+  -Dversion=0.1.0-SNAPSHOT \
+  -Dpackage=com.myteam.language \
+  -DlexcupstudioVersion=0.1.0-SNAPSHOT \
+  -DinteractiveMode=false
 ```

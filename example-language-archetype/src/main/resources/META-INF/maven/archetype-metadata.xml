@@ -1,0 +1,47 @@
+<archetype-descriptor name="lexcupstudio-example-language-archetype">
+    <requiredProperties>
+        <requiredProperty key="groupId"/>
+        <requiredProperty key="artifactId"/>
+        <requiredProperty key="version" defaultValue="1.0.0-SNAPSHOT"/>
+        <requiredProperty key="package" defaultValue="com.example.language"/>
+        <requiredProperty key="lexcupstudioVersion" defaultValue="0.1.0-SNAPSHOT"/>
+    </requiredProperties>
+
+    <fileSets>
+        <fileSet filtered="true" packaged="false" encoding="UTF-8">
+            <directory></directory>
+            <includes>
+                <include>pom.xml</include>
+                <include>README.md</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" packaged="false" encoding="UTF-8">
+            <directory>src/main/cup</directory>
+            <includes>
+                <include>example.cup</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" packaged="false" encoding="UTF-8">
+            <directory>src/main/jflex</directory>
+            <includes>
+                <include>example.flex</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+            <directory>src/test/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</archetype-descriptor>
