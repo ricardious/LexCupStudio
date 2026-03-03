@@ -1,5 +1,6 @@
 package edu.usac.olc1.olc1_proyecto1.ui.managers;
 
+import edu.usac.olc1.olc1_proyecto1.ui.utils.DialogStyler;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
 import org.fxmisc.richtext.CodeArea;
@@ -20,6 +21,7 @@ public class FileManager {
 
     public File createNewFile(File directory) {
         TextInputDialog dialog = new TextInputDialog("new_file.txt");
+        DialogStyler.apply(dialog);
         dialog.setTitle("Create New File");
         dialog.setHeaderText("Enter the file name:");
         dialog.setContentText("File name:");
@@ -43,6 +45,7 @@ public class FileManager {
 
     public File createNewFolder(File directory) {
         TextInputDialog dialog = new TextInputDialog("New Folder");
+        DialogStyler.apply(dialog);
         dialog.setTitle("Create New Folder");
         dialog.setHeaderText("Enter the folder name:");
         dialog.setContentText("Folder name:");

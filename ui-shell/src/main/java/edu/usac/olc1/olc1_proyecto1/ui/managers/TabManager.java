@@ -18,8 +18,10 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.reactfx.Subscription;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TabManager {
@@ -248,5 +250,29 @@ public class TabManager {
                 tabContentArea.getChildren().add(content);
             }
         }
+    }
+
+    public List<Tab> getDirtyTabs() {
+        List<Tab> dirtyTabs = new ArrayList<>();
+        for (Tab tab : editorTabPane.getTabs()) {
+            if (isDirtyTab(tab)) {
+                dirtyTabs.add(tab);
+            }
+        }
+        return dirtyTabs;
+    }
+
+    public boolean isDirtyTab(Tab tab) {
+        if (tab == null) {
+            return false;
+        }
+        return tab.getText() != null && tab.getText().endsWith(" ●");
+    }
+
+    public String getTabDisplayName(Tab tab) {
+        if (tab == null || tab.getText() == null) {
+            return "";
+        }
+        return tab.getText().replace(" ●", "");
     }
 }

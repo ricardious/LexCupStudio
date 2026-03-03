@@ -648,30 +648,42 @@
     -fx-padding: 2px 5px;
 }
 
-.rename-dialog {
+.rename-dialog, .app-dialog {
     -fx-background-color: #1F2228;
     -fx-border-color: #3C3C4A;
     -fx-border-width: 1px;
 }
 
-.rename-dialog:header *.header-panel {
+.rename-dialog:header *.header-panel,
+.app-dialog:header *.header-panel {
     -fx-background-color: #24272E;
     -fx-border-color: #3C3C4A;
     -fx-border-width: 0 0 1 0;
 }
 
-.rename-dialog:header *.header-panel *.label {
+.rename-dialog:header *.header-panel *.label,
+.app-dialog:header *.header-panel *.label {
     -fx-text-fill: #BDC3D1;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
 }
 
-.rename-dialog > *.content.label {
-    -fx-text-fill: #9099AC;
+.rename-dialog > *.content.label,
+.app-dialog > *.content.label {
+    -fx-text-fill: #BDC3D1;
     -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
 }
 
-.rename-dialog .text-field {
+.rename-dialog .content,
+.app-dialog .content,
+.rename-dialog .label.content,
+.app-dialog .label.content {
+    -fx-text-fill: #BDC3D1;
+}
+
+.rename-dialog .text-field,
+.app-dialog .text-field {
     -fx-background-color: #24272E;
     -fx-text-fill: #dcddde;
     -fx-border-color: #444455;
@@ -682,7 +694,8 @@
     -fx-highlight-text-fill: white;
 }
 
-.rename-dialog .button-bar .button {
+.rename-dialog .button-bar .button,
+.app-dialog .button-bar .button {
     -fx-background-color: #2E3139;
     -fx-text-fill: #BDC3D1;
     -fx-border-color: #444455;
@@ -691,7 +704,8 @@
     -fx-font-family: "JetBrains Mono";
 }
 
-.rename-dialog .button-bar .button:hover {
+.rename-dialog .button-bar .button:hover,
+.app-dialog .button-bar .button:hover {
     -fx-background-color: #393c43;
 }
 

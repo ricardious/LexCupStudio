@@ -2,6 +2,7 @@ package edu.usac.olc1.olc1_proyecto1.ui.components;
 
 import edu.usac.olc1.olc1_proyecto1.ui.managers.FileManager;
 import edu.usac.olc1.olc1_proyecto1.ui.theme.IconProvider;
+import edu.usac.olc1.olc1_proyecto1.ui.utils.DialogStyler;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.SVGLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -12,7 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 import java.io.File;
-import java.net.URL;
 
 public class FileTreeCell extends TreeCell<String> {
 
@@ -23,7 +23,6 @@ public class FileTreeCell extends TreeCell<String> {
     private final File baseDirectory;
     private final FileManager fileManager;
     private static final DataFormat JAVA_FORMAT = new DataFormat("application/x-java-serialized-object");
-    private static final String MAIN_STYLESHEET = "/edu/usac/olc1/olc1_proyecto1/css/main.css";
     private ContextMenu contextMenu;
 
     public FileTreeCell(File baseDirectory) {
@@ -297,10 +296,10 @@ public class FileTreeCell extends TreeCell<String> {
 
     private void renameFileOrFolder(File file, TreeItem<String> item) {
         TextInputDialog dialog = new TextInputDialog(file.getName());
+        DialogStyler.apply(dialog);
         dialog.setTitle("Rename");
         dialog.setHeaderText("Rename " + (file.isDirectory() ? "folder" : "file"));
         dialog.setContentText("New name:");
-        styleDialog(dialog, "rename-dialog");
         dialog.showAndWait().ifPresent(newName -> {
             if (!newName.isEmpty()) {
                 boolean renamed = fileManager.rename(file, newName);
@@ -313,26 +312,16 @@ public class FileTreeCell extends TreeCell<String> {
                     alert.setContentText("Could not rename the " +
                             (file.isDirectory() ? "directory" : "file") +
                             ". Check permissions or if an item with that name already exists.");
-                    styleDialog(alert, "rename-dialog");
+                    DialogStyler.apply(alert);
                     alert.showAndWait();
                 }
             }
         });
     }
 
-    private void styleDialog(Dialog<?> dialog, String styleClass) {
-        DialogPane pane = dialog.getDialogPane();
-        URL cssUrl = FileTreeCell.class.getResource(MAIN_STYLESHEET);
-        if (cssUrl != null && pane.getStylesheets().stream().noneMatch(s -> s.equals(cssUrl.toExternalForm()))) {
-            pane.getStylesheets().add(cssUrl.toExternalForm());
-        }
-        if (!pane.getStyleClass().contains(styleClass)) {
-            pane.getStyleClass().add(styleClass);
-        }
-    }
-
     private void deleteFileOrFolder(File file, TreeItem<String> item) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        DialogStyler.apply(confirmation);
         confirmation.setTitle("Confirm deletion");
         confirmation.setHeaderText("Are you sure you want to delete the " +
                 (file.isDirectory() ? "folder" : "file") +
@@ -349,6 +338,7 @@ public class FileTreeCell extends TreeCell<String> {
                     }
                 } else {
                     Alert error = new Alert(Alert.AlertType.ERROR);
+                    DialogStyler.apply(error);
                     error.setTitle("Error");
                     error.setHeaderText("Error deleting");
                     error.setContentText("Could not delete the " +

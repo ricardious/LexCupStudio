@@ -3,6 +3,7 @@ package edu.usac.olc1.olc1_proyecto1.ui.components;
 
 import edu.usac.olc1.olc1_proyecto1.ui.components.commands.*;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.BannerGenerator;
+import edu.usac.olc1.olc1_proyecto1.ui.utils.BrandingConfig;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.Fonts;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.Styles;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.TerminalTheme;
@@ -47,7 +48,7 @@ public class Terminal extends ScrollPane {
         // Initialize environment
         env = new HashMap<>();
         userHomeDir = System.getProperty("user.home");
-        currentDir = userHomeDir + "/proyectos/dilemma-forge";
+        currentDir = userHomeDir + "/proyectos/" + appSlug();
         env.put("HOME", userHomeDir);
         env.put("PWD", currentDir);
 
@@ -427,7 +428,7 @@ public class Terminal extends ScrollPane {
 
         TextFlow bannerFlow = bannerGen.getFormattedBanner("OLC1");
 
-        Text welcomeText = new Text("\nDilemma Forge Terminal v1.0.0\n" +
+        Text welcomeText = new Text("\n" + appName() + " Terminal v1.0.0\n" +
                 "Type 'help' to see available commands\n\n");
         welcomeText.setFill(theme.getTextColor());
         welcomeText.setFont(Font.font("JetBrains Mono", 12));
@@ -438,7 +439,7 @@ public class Terminal extends ScrollPane {
 
     private void loadCommandHistory() {
         try {
-            File historyFile = new File(userHomeDir + "/.dilemma_forge_history");
+            File historyFile = historyFile();
             if (historyFile.exists()) {
                 BufferedReader reader = new BufferedReader(new FileReader(historyFile));
                 String line;
@@ -455,7 +456,7 @@ public class Terminal extends ScrollPane {
 
     private void saveCommandHistory() {
         try {
-            File historyFile = new File(userHomeDir + "/.dilemma_forge_history");
+            File historyFile = historyFile();
             BufferedWriter writer = new BufferedWriter(new FileWriter(historyFile));
             for (String cmd : commandHistory) {
                 writer.write(cmd);
@@ -465,6 +466,21 @@ public class Terminal extends ScrollPane {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String appName() {
+        return BrandingConfig.getAppName();
+    }
+
+    private String appSlug() {
+        String slug = appName().toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-|-$)", "");
+        return slug.isBlank() ? "lexcupstudio" : slug;
+    }
+
+    private File historyFile() {
+        return new File(userHomeDir + "/." + appSlug().replace('-', '_') + "_history");
     }
 
     // Getters and setters

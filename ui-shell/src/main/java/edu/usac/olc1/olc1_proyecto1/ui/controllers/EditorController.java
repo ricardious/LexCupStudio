@@ -7,6 +7,7 @@ import edu.usac.olc1.olc1_proyecto1.ui.managers.FileManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.SyntaxHighlightingManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.TabManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.BrandingConfig;
+import edu.usac.olc1.olc1_proyecto1.ui.utils.DialogStyler;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.ResourceManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.WindowDragger;
 import io.lexcupstudio.ui.api.DiagnosticType;
@@ -571,8 +572,52 @@ public class EditorController implements Initializable {
     }
 
     private void closeWindow() {
+        if (!confirmCloseWithUnsavedChanges()) {
+            return;
+        }
         Stage stage = (Stage) btnClose.getScene().getWindow();
         stage.close();
+    }
+
+    private boolean confirmCloseWithUnsavedChanges() {
+        List<Tab> dirtyTabs = tabManager.getDirtyTabs();
+        if (dirtyTabs.isEmpty()) {
+            return true;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        DialogStyler.apply(alert);
+        alert.setTitle("Unsaved Changes");
+        alert.setHeaderText("Hay archivos sin guardar");
+
+        StringBuilder content = new StringBuilder("Se detectaron cambios en:\n");
+        for (int i = 0; i < dirtyTabs.size(); i++) {
+            if (i >= 6) {
+                content.append("... y ").append(dirtyTabs.size() - i).append(" archivo(s) más.\n");
+                break;
+            }
+            content.append("• ").append(tabManager.getTabDisplayName(dirtyTabs.get(i))).append('\n');
+        }
+        content.append("\n¿Deseas guardar antes de salir?");
+        alert.setContentText(content.toString());
+
+        ButtonType saveButton = new ButtonType("Guardar y salir");
+        ButtonType dontSaveButton = new ButtonType("Salir sin guardar");
+        ButtonType cancelButton = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() == cancelButton) {
+            return false;
+        }
+
+        if (result.get() == saveButton) {
+            for (Tab tab : dirtyTabs) {
+                tabManager.saveFile(tab);
+            }
+        }
+
+        return true;
     }
 
     private void minimizeWindow() {
@@ -766,6 +811,7 @@ public class EditorController implements Initializable {
     @FXML
     private void handleCloneRepository() {
         Dialog<String> dialog = new Dialog<>();
+        DialogStyler.apply(dialog);
         dialog.setTitle("Clone Repository");
         dialog.setHeaderText("Enter the repository URL to clone");
 
@@ -815,6 +861,7 @@ public class EditorController implements Initializable {
 
             if (projectDir.exists()) {
                 Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                DialogStyler.apply(confirmAlert);
                 confirmAlert.setTitle("Directory Exists");
                 confirmAlert.setHeaderText("The directory '" + projectName + "' already exists");
                 confirmAlert.setContentText("Do you want to continue? This may overwrite existing files.");
@@ -912,6 +959,7 @@ public class EditorController implements Initializable {
 
     private void showErrorDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        DialogStyler.apply(alert);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
@@ -920,6 +968,7 @@ public class EditorController implements Initializable {
 
     private void showInfoDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        DialogStyler.apply(alert);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
