@@ -1,0 +1,19 @@
+package my.language;
+
+parser code {:
+    // expose parse errors through your adapter
+:};
+
+terminal String ID, NUMBER;
+terminal PLUS, MINUS;
+non terminal Object expr;
+
+precedence left PLUS, MINUS;
+
+start with expr;
+
+expr ::= expr PLUS expr
+       | expr MINUS expr
+       | NUMBER
+       | ID
+       ;
