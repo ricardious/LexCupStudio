@@ -4,6 +4,7 @@ import edu.usac.olc1.olc1_proyecto1.ui.components.FileTreeCell;
 import edu.usac.olc1.olc1_proyecto1.ui.components.Terminal;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.AutoCompletionManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.FileManager;
+import edu.usac.olc1.olc1_proyecto1.ui.managers.SyntaxHighlightingManager;
 import edu.usac.olc1.olc1_proyecto1.ui.managers.TabManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.ResourceManager;
 import edu.usac.olc1.olc1_proyecto1.ui.utils.WindowDragger;
@@ -125,6 +126,7 @@ public class EditorController implements Initializable {
     private final FileManager fileManager = new FileManager();
     private TabManager tabManager;
     private final AutoCompletionManager autoCompletionManager = new AutoCompletionManager();
+    private final SyntaxHighlightingManager syntaxHighlightingManager = new SyntaxHighlightingManager();
     private static final Logger LOGGER = Logger.getLogger(EditorController.class.getName());
     private boolean isPanelExpanded = true;
     private double originalDividerPosition;
@@ -147,6 +149,7 @@ public class EditorController implements Initializable {
         tabManager.registerTab(welcomeTab, welcomeContent);
 
         codeEditor.setParagraphGraphicFactory(LineNumberFactory.get(codeEditor));
+        syntaxHighlightingManager.bind(codeEditor);
 
         autoCompletionManager.setupAutoCompletion(codeEditor);
 
