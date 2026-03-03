@@ -15,6 +15,7 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.reactfx.Subscription;
 
 import java.io.File;
 import java.util.Arrays;
@@ -30,6 +31,8 @@ public class TabManager {
     private final Map<Tab, VirtualizedScrollPane<CodeArea>> contentMap = new HashMap<>();
     private final Map<Tab, ImageViewer> imageViewerMap = new HashMap<>();
     private final Map<Tab, Node> nodeMap = new HashMap<>();
+    private final Map<Tab, Subscription> highlightSubscriptionMap = new HashMap<>();
+    private final SyntaxHighlightingManager syntaxHighlightingManager = new SyntaxHighlightingManager();
 
     public TabManager(TabPane editorTabPane, StackPane tabContentArea) {
         this.editorTabPane = editorTabPane;
@@ -77,6 +80,7 @@ public class TabManager {
 
     public void showPreview(File file, FileManager fileManager) {
         if (currentPreviewTab != null) {
+            unsubscribeHighlight(currentPreviewTab);
             editorTabPane.getTabs().remove(currentPreviewTab);
             contentMap.remove(currentPreviewTab);
             imageViewerMap.remove(currentPreviewTab);
@@ -105,6 +109,7 @@ public class TabManager {
 
             previewEditor.moveTo(0);
             previewEditor.requestFollowCaret();
+            highlightSubscriptionMap.put(currentPreviewTab, syntaxHighlightingManager.bind(previewEditor));
 
             VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(previewEditor);
             contentMap.put(currentPreviewTab, scrollPane);
@@ -124,6 +129,7 @@ public class TabManager {
         }
 
         if (currentPreviewTab != null) {
+            unsubscribeHighlight(currentPreviewTab);
             editorTabPane.getTabs().remove(currentPreviewTab);
             contentMap.remove(currentPreviewTab);
             imageViewerMap.remove(currentPreviewTab);
@@ -158,6 +164,7 @@ public class TabManager {
             fileEditor.getUndoManager().mark();
 
             addChangeListenerToCodeArea(fileEditor, tab, file.getName());
+            highlightSubscriptionMap.put(tab, syntaxHighlightingManager.bind(fileEditor));
 
             VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(fileEditor);
             contentMap.put(tab, scrollPane);
@@ -205,9 +212,17 @@ public class TabManager {
     }
 
     public void closeTab(Tab tab) {
+        unsubscribeHighlight(tab);
         contentMap.remove(tab);
         fileMap.remove(tab);
         editorTabPane.getTabs().remove(tab);
+    }
+
+    private void unsubscribeHighlight(Tab tab) {
+        Subscription subscription = highlightSubscriptionMap.remove(tab);
+        if (subscription != null) {
+            subscription.unsubscribe();
+        }
     }
 
     public File getActiveFile() {
