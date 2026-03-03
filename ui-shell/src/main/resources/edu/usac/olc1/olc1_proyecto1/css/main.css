@@ -280,10 +280,13 @@
     -fx-border-color: #444455;
     -fx-border-radius: 5px;
     -fx-font-size: 13px;
-    -fx-font-family: "Arial";
+    -fx-font-family: "JetBrains Mono";
     -fx-border-width: 1px;
     -fx-padding: 0px 0px 0px 32px;
-    -fx-text-fill: white;
+    -fx-text-fill: #BDC3D1;
+    -fx-prompt-text-fill: #9099AC;
+    -fx-highlight-fill: rgba(97, 175, 239, 0.3);
+    -fx-highlight-text-fill: #BDC3D1;
 }
 
 .list-view {
@@ -768,5 +771,40 @@
 }
 
 .problems-list .list-cell:filled:hover {
+    -fx-background-color: rgba(97, 175, 239, 0.12);
+}
+
+.search-results-list {
+    -fx-background-color: #24272E;
+    -fx-control-inner-background: #24272E;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.search-results-list .virtual-flow,
+.search-results-list .clipped-container,
+.search-results-list .sheet,
+.search-results-list .viewport {
+    -fx-background-color: #24272E;
+}
+
+.search-results-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(171, 178, 191);
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+    -fx-padding: 6px 10px;
+}
+
+.search-results-list .list-cell:odd {
+    -fx-background-color: transparent;
+}
+
+.search-results-list .list-cell:filled:selected {
+    -fx-background-color: rgba(97, 175, 239, 0.25);
+    -fx-text-fill: rgb(171, 178, 191);
+}
+
+.search-results-list .list-cell:filled:hover {
     -fx-background-color: rgba(97, 175, 239, 0.12);
 }

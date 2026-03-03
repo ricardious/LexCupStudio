@@ -47,6 +47,8 @@ import org.fxmisc.richtext.LineNumberFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +85,12 @@ public class EditorController implements Initializable {
 
     @FXML
     private AnchorPane searchPanel;
+
+    @FXML
+    private TextField searchInput;
+
+    @FXML
+    private ListView<SearchResultEntry> searchResultsList;
 
     @FXML
     private AnchorPane sourceControlPanel;
@@ -164,6 +172,8 @@ public class EditorController implements Initializable {
     private double originalDividerPosition;
     private CodeArea trackedCodeArea;
     private final ChangeListener<String> diagnosticsTextListener = (obs, oldText, newText) -> diagnosticsDebounce.playFromStart();
+    private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(250));
+    private Task<List<SearchResultEntry>> activeSearchTask;
 
     /**
      * @param url
@@ -220,6 +230,7 @@ public class EditorController implements Initializable {
         setupTabSwitching();
         setupProblemsPanel();
         setupDiagnosticsTracking();
+        setupSearchPanel();
 
         hideTerminalPanel();
 
@@ -403,6 +414,172 @@ public class EditorController implements Initializable {
                     goToProblem(selected);
                 }
             }
+        });
+    }
+
+    private void setupSearchPanel() {
+        searchResultsList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(SearchResultEntry item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(item.prettyText());
+            }
+        });
+
+        searchResultsList.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                SearchResultEntry selected = searchResultsList.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    openSearchResult(selected);
+                }
+            }
+        });
+
+        searchResultsList.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                SearchResultEntry selected = searchResultsList.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    openSearchResult(selected);
+                }
+            }
+        });
+
+        searchDebounce.setOnFinished(e -> performSearch(searchInput.getText()));
+        searchInput.textProperty().addListener((obs, oldValue, newValue) -> searchDebounce.playFromStart());
+    }
+
+    private void performSearch(String query) {
+        if (query == null || query.isBlank()) {
+            searchResultsList.getItems().clear();
+            return;
+        }
+
+        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
+            searchResultsList.getItems().setAll(new SearchResultEntry(
+                    null, -1, "Open a folder first to search.", false
+            ));
+            return;
+        }
+
+        if (activeSearchTask != null && activeSearchTask.isRunning()) {
+            activeSearchTask.cancel();
+        }
+
+        final String term = query.trim().toLowerCase();
+        activeSearchTask = new Task<>() {
+            @Override
+            protected List<SearchResultEntry> call() {
+                List<SearchResultEntry> results = new ArrayList<>();
+                walkAndSearch(selectedDirectory, term, results, 200);
+                return results;
+            }
+        };
+
+        activeSearchTask.setOnSucceeded(e -> {
+            List<SearchResultEntry> results = activeSearchTask.getValue();
+            if (results == null || results.isEmpty()) {
+                searchResultsList.getItems().setAll(new SearchResultEntry(
+                        null, -1, "No results found.", false
+                ));
+            } else {
+                searchResultsList.getItems().setAll(results);
+            }
+        });
+
+        activeSearchTask.setOnFailed(e -> searchResultsList.getItems().setAll(
+                new SearchResultEntry(null, -1, "Search failed: " + activeSearchTask.getException().getMessage(), false)
+        ));
+
+        Thread searchThread = new Thread(activeSearchTask, "search-task");
+        searchThread.setDaemon(true);
+        searchThread.start();
+    }
+
+    private void walkAndSearch(File dir, String term, List<SearchResultEntry> results, int limit) {
+        if (dir == null || results.size() >= limit) {
+            return;
+        }
+
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            if (activeSearchTask != null && activeSearchTask.isCancelled()) {
+                return;
+            }
+
+            if (file.isDirectory()) {
+                walkAndSearch(file, term, results, limit);
+                if (results.size() >= limit) {
+                    return;
+                }
+                continue;
+            }
+
+            if (file.getName().toLowerCase().contains(term)) {
+                results.add(new SearchResultEntry(file, 1, "File name match", false));
+                if (results.size() >= limit) {
+                    return;
+                }
+            }
+
+            scanFileContent(file, term, results, limit);
+            if (results.size() >= limit) {
+                return;
+            }
+        }
+    }
+
+    private void scanFileContent(File file, String term, List<SearchResultEntry> results, int limit) {
+        if (limit <= results.size()) {
+            return;
+        }
+        if (file.length() > 1024 * 1024) {
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            int lineNumber = 0;
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                if (line.toLowerCase().contains(term)) {
+                    String snippet = line.trim();
+                    if (snippet.length() > 120) {
+                        snippet = snippet.substring(0, 120) + "...";
+                    }
+                    results.add(new SearchResultEntry(file, lineNumber, snippet, true));
+                    if (results.size() >= limit) {
+                        return;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void openSearchResult(SearchResultEntry entry) {
+        if (entry == null || entry.file() == null) {
+            return;
+        }
+
+        tabManager.openFile(entry.file(), fileManager);
+        Platform.runLater(() -> {
+            CodeArea activeEditor = tabManager.getActiveCodeArea();
+            if (activeEditor == null) {
+                return;
+            }
+            int offset = offsetForLineColumn(activeEditor.getText(), Math.max(1, entry.line()), 1);
+            activeEditor.requestFocus();
+            activeEditor.moveTo(offset);
+            activeEditor.requestFollowCaret();
         });
     }
 
@@ -771,6 +948,19 @@ public class EditorController implements Initializable {
         String prettyText() {
             return "[" + diagnostic.getType() + "] L" + diagnostic.getLine() + ":C" + diagnostic.getColumn()
                     + " - " + diagnostic.getMessage();
+        }
+    }
+
+    private record SearchResultEntry(File file, int line, String snippet, boolean contentMatch) {
+        String prettyText() {
+            if (file == null) {
+                return snippet;
+            }
+            String name = file.getName();
+            if (contentMatch) {
+                return name + "  |  L" + line + ": " + snippet;
+            }
+            return name + "  |  " + snippet;
         }
     }
 

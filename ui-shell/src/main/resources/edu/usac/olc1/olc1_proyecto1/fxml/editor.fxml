@@ -176,7 +176,7 @@
                                         </HBox>
                                         <AnchorPane>
                                             <children>
-                                                <TextField prefHeight="32.0" prefWidth="202.0"
+                                                <TextField fx:id="searchInput" prefHeight="32.0" prefWidth="202.0"
                                                            promptText="Search (Ctrl + F)" styleClass="search"
                                                            AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
                                                            AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0"/>
@@ -189,7 +189,7 @@
                                                 </ImageView>
                                             </children>
                                         </AnchorPane>
-                                        <ListView VBox.vgrow="ALWAYS"/>
+                                        <ListView fx:id="searchResultsList" styleClass="search-results-list" VBox.vgrow="ALWAYS"/>
                                     </children>
                                 </VBox>
                             </children>
