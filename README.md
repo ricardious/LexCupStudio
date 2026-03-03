@@ -14,6 +14,7 @@ Que cualquier proyecto nuevo pueda:
 
 - `core/`: contratos y pipeline reutilizable.
 - `starter/`: plantillas `.flex` / `.cup` y utilidades de arranque.
+- `example-language/`: ejemplo funcional con generación JFlex + CUP y adapters reales.
 
 ## Uso rápido
 
@@ -28,6 +29,8 @@ Que cualquier proyecto nuevo pueda:
 mvn clean test
 ```
 
-## Siguiente paso recomendado
+## Ejecutar ejemplo
 
-Agregar un módulo `example-language` con una gramática mínima funcional para validar flujo end-to-end.
+```bash
+mvn -pl example-language -am test
+```
