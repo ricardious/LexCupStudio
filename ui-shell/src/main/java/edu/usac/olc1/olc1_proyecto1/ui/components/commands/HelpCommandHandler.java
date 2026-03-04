@@ -16,6 +16,8 @@ public class HelpCommandHandler implements CommandHandler {
         helpText.append("  banner [style] - Displays the banner with the specified style\n");
         helpText.append("  cat [file]     - Shows the content of a file\n");
         helpText.append("  echo [text]    - Prints text on the terminal\n");
+        helpText.append("  run [file]     - Executes plugin pipeline for active file or given file\n");
+        helpText.append("  ricardious     - Alias of run\n");
         helpText.append("  exit           - Exits the application\n");
         helpText.append("\n");
         helpText.append("Special features:\n");

@@ -7,12 +7,13 @@ import io.lexcupstudio.ui.api.LanguageRuntimePlugin;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
- * ricardious [ruta/opcional]
+ * run [ruta/opcional] (alias: ricardious)
  * - Si no se da ruta, toma el archivo abierto en la TAB ACTUAL (vía ActiveFileAccessor).
  * - Ejecuta el pipeline y deja reportes en <carpetaDelArchivo>/output
  * - Imprime todo en la terminal.
@@ -35,14 +36,23 @@ public class RicardiousCommandHandler implements CommandHandler {
             File file;
             if (args.length == 0) {
                 file = activeFileAccessor.getActiveFile();
-                if (file == null) return "No hay archivo activo en la pestaña actual.\nUso: ricardious <archivo>\n";
+                if (file == null) return "No hay archivo activo en la pestaña actual.\nUso: run <archivo>\n";
             } else {
                 // ruta relativa al PWD de la terminal
-                String path = args[0];
+                String path = String.join(" ", args);
                 if (!path.startsWith("/") && !path.startsWith("~")) {
                     path = terminal.getCurrentDir() + File.separator + path;
                 }
                 file = new File(path.replace("~", System.getProperty("user.home")));
+            }
+
+            if (file.exists() && file.isDirectory()) {
+                File entryFile = resolveProjectEntryFile(file);
+                if (entryFile == null) {
+                    return "No se encontró archivo de entrada en proyecto: " + file + "\n";
+                }
+                file = entryFile;
+                terminal.displayOutput("Run Project -> entrada detectada: " + file.getAbsolutePath());
             }
 
             if (!file.exists() || !file.isFile()) {
@@ -52,7 +62,7 @@ public class RicardiousCommandHandler implements CommandHandler {
             String src = Files.readString(file.toPath());
             Path baseDir = file.getParentFile().toPath();
 
-            terminal.displayOutput("Ejecutando ricardious sobre: " + file.getAbsolutePath());
+            terminal.displayOutput("Ejecutando run sobre: " + file.getAbsolutePath());
             if (plugin == null) {
                 return "No hay plugin de lenguaje cargado. " +
                         "Agrega una implementación de LanguageRuntimePlugin.\n";
@@ -68,8 +78,7 @@ public class RicardiousCommandHandler implements CommandHandler {
                     : "Ejecución con errores. Revisa: " + baseDir.resolve(plugin.reportsDirectoryName()) + "\n";
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return "Error al ejecutar ricardious: " + ex.getMessage() + "\n";
+            return "Error al ejecutar run: " + ex.getMessage() + "\n";
         }
     }
 
@@ -80,5 +89,47 @@ public class RicardiousCommandHandler implements CommandHandler {
                 .filter(p -> "ricardious".equalsIgnoreCase(p.commandName()))
                 .findFirst();
         return maybe.orElseGet(() -> loader.findFirst().orElse(null));
+    }
+
+    private File resolveProjectEntryFile(File rootDir) {
+        File[] topLevel = rootDir.listFiles(File::isFile);
+        if (topLevel == null || topLevel.length == 0) {
+            return findFirstFileRecursively(rootDir);
+        }
+
+        Arrays.sort(topLevel, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        String[] priorities = {"main", "index", "program", "entrada"};
+        for (String p : priorities) {
+            for (File file : topLevel) {
+                String lower = file.getName().toLowerCase();
+                if (lower.equals(p) || lower.startsWith(p + ".")) {
+                    return file;
+                }
+            }
+        }
+
+        return topLevel[0];
+    }
+
+    private File findFirstFileRecursively(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return null;
+        }
+        Arrays.sort(files, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        for (File file : files) {
+            if (file.isFile()) {
+                return file;
+            }
+        }
+        for (File file : files) {
+            if (file.isDirectory()) {
+                File nested = findFirstFileRecursively(file);
+                if (nested != null) {
+                    return nested;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -95,6 +95,9 @@ public class EditorController implements Initializable {
     @FXML
     private AnchorPane sourceControlPanel;
 
+    @FXML
+    private ListView<SourceControlEntry> sourceControlList;
+
 
     @FXML
     private Button explorerBtn;
@@ -113,6 +116,9 @@ public class EditorController implements Initializable {
 
     @FXML
     private TabPane editorTabPane;
+
+    @FXML
+    private Tab welcomeTab;
 
     @FXML
     private StackPane tabContentArea;
@@ -174,6 +180,8 @@ public class EditorController implements Initializable {
     private final ChangeListener<String> diagnosticsTextListener = (obs, oldText, newText) -> diagnosticsDebounce.playFromStart();
     private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(250));
     private Task<List<SearchResultEntry>> activeSearchTask;
+    private Task<List<SourceControlEntry>> activeSourceControlTask;
+    private edu.usac.olc1.olc1_proyecto1.ui.components.commands.RicardiousCommandHandler runCommandHandler;
 
     /**
      * @param url
@@ -184,7 +192,9 @@ public class EditorController implements Initializable {
         new WindowDragger().makeDraggable(titleBar);
         setupWindowControls();
 
-        Tab welcomeTab = editorTabPane.getTabs().get(0);
+        if (welcomeTab == null && !editorTabPane.getTabs().isEmpty()) {
+            welcomeTab = editorTabPane.getTabs().get(0);
+        }
         javafx.scene.Node welcomeContent = welcomeTab.getContent();
         welcomeTab.setContent(null);
 
@@ -231,24 +241,24 @@ public class EditorController implements Initializable {
         setupProblemsPanel();
         setupDiagnosticsTracking();
         setupSearchPanel();
+        setupSourceControlPanel();
 
         hideTerminalPanel();
 
         Platform.runLater(this::initializePanelButtons);
 
-        terminal.registerCommand(
-                "ricardious",
-                new edu.usac.olc1.olc1_proyecto1.ui.components.commands.RicardiousCommandHandler(
-                        terminal,
-                        () -> {
-                            java.io.File f = null;
-                            try {
-                                f = tabManager.getActiveFile();
-                            } catch (Exception ignore) {}
-                            return f;
-                        }
-                )
+        runCommandHandler = new edu.usac.olc1.olc1_proyecto1.ui.components.commands.RicardiousCommandHandler(
+                terminal,
+                () -> {
+                    java.io.File f = null;
+                    try {
+                        f = tabManager.getActiveFile();
+                    } catch (Exception ignore) {}
+                    return f;
+                }
         );
+        terminal.registerCommand("ricardious", runCommandHandler);
+        terminal.registerCommand("run", runCommandHandler);
 
 
     }
@@ -297,36 +307,21 @@ public class EditorController implements Initializable {
                     btnMinimizePanel.setManaged(false);
                 }
             });
-        } else {
-            System.err.println("Warning: SplitPane does not have any dividers yet");
         }
     }
 
     private void runAllTabs() {
         CodeArea activeEditor = tabManager.getActiveCodeArea();
         if (activeEditor == null) {
-            appendOutput("No hay un editor de código activo para ejecutar.");
+            terminal.displayOutput("No hay un editor de código activo para ejecutar.");
             return;
         }
 
-        analyzeEditor(activeEditor, true);
-
-        if (languagePlugin == null) {
-            appendOutput("No hay plugin de lenguaje cargado (LanguageRuntimePlugin).");
-            return;
-        }
-
-        Path projectDir = resolveProjectDirectory();
-        boolean ok = languagePlugin.run(
-                activeEditor.getText(),
-                projectDir,
-                this::appendOutput
-        );
-
-        if (ok) {
-            appendOutput("Ejecución completada. Reportes en: " + projectDir.resolve(languagePlugin.reportsDirectoryName()));
+        File activeFile = tabManager.getActiveFile();
+        if (activeFile != null) {
+            terminal.executeCommandFromUi("run " + activeFile.getAbsolutePath());
         } else {
-            appendOutput("Ejecución finalizada con errores.");
+            terminal.executeCommandFromUi("run");
         }
     }
 
@@ -450,6 +445,209 @@ public class EditorController implements Initializable {
 
         searchDebounce.setOnFinished(e -> performSearch(searchInput.getText()));
         searchInput.textProperty().addListener((obs, oldValue, newValue) -> searchDebounce.playFromStart());
+    }
+
+    private void setupSourceControlPanel() {
+        sourceControlList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(SourceControlEntry item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(item.prettyText());
+            }
+        });
+
+        sourceControlList.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                SourceControlEntry selected = sourceControlList.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    openSourceControlEntry(selected);
+                }
+            }
+        });
+
+        sourceControlList.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                SourceControlEntry selected = sourceControlList.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    openSourceControlEntry(selected);
+                }
+            }
+        });
+    }
+
+    @FXML
+    private void handleRefreshSourceControl(ActionEvent event) {
+        refreshSourceControlStatus();
+    }
+
+    @FXML
+    private void handleStageAllChanges(ActionEvent event) {
+        Path repoRoot = detectGitRepoRoot();
+        if (repoRoot == null) {
+            showInfoDialog("Source Control", "No Git repository detected.");
+            return;
+        }
+
+        try {
+            runGitCommand(repoRoot, "add", "-A");
+            appendOutput("Git: stage all completed.");
+            refreshSourceControlStatus();
+        } catch (Exception ex) {
+            showErrorDialog("Git Error", "Failed to stage changes: " + ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleCommitChanges(ActionEvent event) {
+        Path repoRoot = detectGitRepoRoot();
+        if (repoRoot == null) {
+            showInfoDialog("Source Control", "No Git repository detected.");
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog();
+        DialogStyler.apply(dialog);
+        dialog.setTitle("Commit Changes");
+        dialog.setHeaderText("Create commit");
+        dialog.setContentText("Message:");
+        Optional<String> messageResult = dialog.showAndWait();
+
+        if (messageResult.isEmpty() || messageResult.get().isBlank()) {
+            return;
+        }
+
+        String message = messageResult.get().trim();
+        try {
+            runGitCommand(repoRoot, "add", "-A");
+            runGitCommand(repoRoot, "commit", "-m", message);
+            appendOutput("Git: commit created.");
+            refreshSourceControlStatus();
+        } catch (Exception ex) {
+            showErrorDialog("Git Error", "Failed to commit changes: " + ex.getMessage());
+        }
+    }
+
+    private void refreshSourceControlStatus() {
+        Path repoRoot = detectGitRepoRoot();
+        if (repoRoot == null) {
+            if (selectedDirectory == null) {
+                sourceControlList.getItems().setAll(new SourceControlEntry("..", "No folder opened.", null));
+            } else {
+                sourceControlList.getItems().setAll(new SourceControlEntry("!!", "No Git repository detected in opened folder.", null));
+            }
+            return;
+        }
+
+        if (activeSourceControlTask != null && activeSourceControlTask.isRunning()) {
+            activeSourceControlTask.cancel();
+        }
+
+        activeSourceControlTask = new Task<>() {
+            @Override
+            protected List<SourceControlEntry> call() throws Exception {
+                String output = runGitCommand(repoRoot, "status", "--porcelain");
+                List<SourceControlEntry> entries = new ArrayList<>();
+                if (output.isBlank()) {
+                    entries.add(new SourceControlEntry("OK", "Working tree clean", repoRoot));
+                    return entries;
+                }
+
+                String[] lines = output.split("\\R");
+                for (String line : lines) {
+                    if (line.isBlank()) {
+                        continue;
+                    }
+                    String status = line.length() >= 2 ? line.substring(0, 2).trim() : "??";
+                    String path = line.length() > 3 ? line.substring(3).trim() : line.trim();
+                    int renameArrow = path.indexOf(" -> ");
+                    if (renameArrow >= 0) {
+                        path = path.substring(renameArrow + 4).trim();
+                    }
+                    entries.add(new SourceControlEntry(status.isEmpty() ? "M" : status, path, repoRoot));
+                }
+                return entries;
+            }
+        };
+
+        activeSourceControlTask.setOnSucceeded(e -> sourceControlList.getItems().setAll(activeSourceControlTask.getValue()));
+        activeSourceControlTask.setOnFailed(e -> {
+            Throwable ex = activeSourceControlTask.getException();
+            String msg = ex == null ? "Unknown error" : ex.getMessage();
+            sourceControlList.getItems().setAll(new SourceControlEntry("!!", "Error: " + msg, repoRoot));
+        });
+
+        Thread t = new Thread(activeSourceControlTask, "source-control-status");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private Path detectGitRepoRoot() {
+        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
+            return null;
+        }
+        Path base = selectedDirectory.toPath();
+        try {
+            String top = runGitCommand(base, "rev-parse", "--show-toplevel").trim();
+            if (!top.isEmpty()) {
+                return Path.of(top);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private void openSourceControlEntry(SourceControlEntry entry) {
+        if (entry == null || entry.repoRoot() == null || entry.path() == null) {
+            return;
+        }
+        if ("Working tree clean".equals(entry.path()) || entry.path().startsWith("No Git") || entry.path().startsWith("Error:")) {
+            return;
+        }
+        File file = entry.repoRoot().resolve(entry.path()).toFile();
+        if (file.exists() && file.isFile()) {
+            tabManager.openFile(file, fileManager);
+        }
+    }
+
+    private String runGitCommand(Path workDir, String... args) throws Exception {
+        List<String> command = new ArrayList<>();
+        command.add("git");
+        command.add("-C");
+        command.add(workDir.toString());
+        command.addAll(List.of(args));
+
+        ProcessBuilder builder = new ProcessBuilder(command);
+        Process process = builder.start();
+
+        String stdout;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line).append('\n');
+            }
+            stdout = out.toString();
+        }
+
+        String stderr;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line).append('\n');
+            }
+            stderr = out.toString().trim();
+        }
+
+        int exit = process.waitFor();
+        if (exit != 0) {
+            throw new RuntimeException(stderr.isBlank() ? ("git exited with code " + exit) : stderr);
+        }
+        return stdout;
     }
 
     private void performSearch(String query) {
@@ -749,14 +947,14 @@ public class EditorController implements Initializable {
     }
 
     private void closeWindow() {
-        if (!confirmCloseWithUnsavedChanges()) {
+        if (!confirmSaveBeforeAction("salir")) {
             return;
         }
         Stage stage = (Stage) btnClose.getScene().getWindow();
         stage.close();
     }
 
-    private boolean confirmCloseWithUnsavedChanges() {
+    private boolean confirmSaveBeforeAction(String actionText) {
         List<Tab> dirtyTabs = tabManager.getDirtyTabs();
         if (dirtyTabs.isEmpty()) {
             return true;
@@ -775,7 +973,7 @@ public class EditorController implements Initializable {
             }
             content.append("• ").append(tabManager.getTabDisplayName(dirtyTabs.get(i))).append('\n');
         }
-        content.append("\n¿Deseas guardar antes de salir?");
+        content.append("\n¿Deseas guardar antes de ").append(actionText).append("?");
         alert.setContentText(content.toString());
 
         ButtonType saveButton = new ButtonType("Guardar y salir");
@@ -817,14 +1015,71 @@ public class EditorController implements Initializable {
 
     @FXML
     private void handleOpenFolder() {
+        openFolderFromChooser();
+    }
+
+    @FXML
+    private void handleMenuOpenFolder(ActionEvent event) {
+        openFolderFromChooser();
+    }
+
+    @FXML
+    private void handleMenuCloseFolder(ActionEvent event) {
+        closeCurrentProject();
+    }
+
+    private void openFolderFromChooser() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select Folder");
         Stage stage = (Stage) btnOpenFolder.getScene().getWindow();
-        selectedDirectory = directoryChooser.showDialog(stage);
-        if (selectedDirectory != null) {
-            explorer.setRoot(null);
-            loadDirectoryWithProgress(selectedDirectory);
-            terminal.setCurrentDir(selectedDirectory.getAbsolutePath());
+        File chosenDirectory = directoryChooser.showDialog(stage);
+        if (chosenDirectory == null) {
+            return;
+        }
+        if (!confirmSaveBeforeAction("abrir otra carpeta")) {
+            return;
+        }
+        switchToProject(chosenDirectory);
+    }
+
+    private void switchToProject(File directory) {
+        closeAllProjectTabs();
+        selectedDirectory = directory;
+        explorer.setRoot(null);
+        loadDirectoryWithProgress(directory);
+        terminal.setCurrentDir(directory.getAbsolutePath());
+        refreshSourceControlStatus();
+    }
+
+    private void closeCurrentProject() {
+        if (selectedDirectory == null && (explorer.getRoot() == null || explorer.getRoot().getChildren().isEmpty())) {
+            return;
+        }
+        if (!confirmSaveBeforeAction("cerrar la carpeta")) {
+            return;
+        }
+        closeAllProjectTabs();
+        selectedDirectory = null;
+        explorer.setRoot(null);
+        checkExplorerState();
+        searchInput.clear();
+        searchResultsList.getItems().clear();
+        sourceControlList.getItems().setAll(new SourceControlEntry("..", "No folder opened.", null));
+        terminal.setCurrentDir(System.getProperty("user.home"));
+    }
+
+    private void closeAllProjectTabs() {
+        List<Tab> toClose = new ArrayList<>();
+        for (Tab tab : editorTabPane.getTabs()) {
+            if (tab != welcomeTab) {
+                toClose.add(tab);
+            }
+        }
+        for (Tab tab : toClose) {
+            tabManager.closeTab(tab);
+        }
+        if (welcomeTab != null) {
+            editorTabPane.getSelectionModel().select(welcomeTab);
         }
     }
 
@@ -886,6 +1141,7 @@ public class EditorController implements Initializable {
             searchPanel.setVisible(true);
         } else if (event.getSource() == toolsBtn) {
             sourceControlPanel.setVisible(true);
+            refreshSourceControlStatus();
         }
     }
 
@@ -944,6 +1200,35 @@ public class EditorController implements Initializable {
         runAllTabs();
     }
 
+    @FXML
+    private void handleRunAllFilesAction(ActionEvent event) {
+        List<File> openFiles = tabManager.getOpenFiles();
+        if (openFiles.isEmpty()) {
+            terminal.displayOutput("No hay archivos abiertos para ejecutar.");
+            return;
+        }
+
+        terminal.displayOutput("Ejecutando run sobre " + openFiles.size() + " archivo(s) abiertos...");
+        for (File file : openFiles) {
+            terminal.executeCommandFromUi("run " + file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void handleRunProjectAction(ActionEvent event) {
+        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
+            terminal.displayOutput("No hay una carpeta de proyecto abierta.");
+            return;
+        }
+        terminal.executeCommandFromUi("run " + selectedDirectory.getAbsolutePath());
+    }
+
+    @FXML
+    private void handleDebugAction(ActionEvent event) {
+        terminal.displayOutput("Debug aún no está implementado. Ejecutando run del archivo activo.");
+        runAllTabs();
+    }
+
     private record ProblemEntry(SourceDiagnostic diagnostic) {
         String prettyText() {
             return "[" + diagnostic.getType() + "] L" + diagnostic.getLine() + ":C" + diagnostic.getColumn()
@@ -961,6 +1246,12 @@ public class EditorController implements Initializable {
                 return name + "  |  L" + line + ": " + snippet;
             }
             return name + "  |  " + snippet;
+        }
+    }
+
+    private record SourceControlEntry(String status, String path, Path repoRoot) {
+        String prettyText() {
+            return String.format("%-2s | %s", status == null ? "??" : status, path == null ? "" : path);
         }
     }
 

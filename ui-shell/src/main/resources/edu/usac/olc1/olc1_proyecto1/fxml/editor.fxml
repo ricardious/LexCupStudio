@@ -210,8 +210,9 @@
                                                             prefWidth="45.0" styleClass="more-button" text="&#8226;&#8226;&#8226;"
                                                             textFill="WHITE">
                                                     <items>
-                                                        <MenuItem mnemonicParsing="false" text="Folders"/>
-                                                        <MenuItem mnemonicParsing="false" text="Action 2"/>
+                                                        <MenuItem mnemonicParsing="false" onAction="#handleRefreshSourceControl" text="Refresh"/>
+                                                        <MenuItem mnemonicParsing="false" onAction="#handleStageAllChanges" text="Stage All"/>
+                                                        <MenuItem mnemonicParsing="false" onAction="#handleCommitChanges" text="Commit"/>
                                                     </items>
                                                 </MenuButton>
                                             </children>
@@ -219,7 +220,7 @@
                                                 <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
                                             </padding>
                                         </HBox>
-                                        <ListView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
+                                        <ListView fx:id="sourceControlList" styleClass="source-control-list" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
                                     </children>
                                 </VBox>
                             </children>
@@ -349,9 +350,10 @@
                                                                               preserveRatio="true"/>
                                                             </graphic>
                                                             <items>
-                                                                <MenuItem text="Run Current File"/>
-                                                                <MenuItem text="Run All Files"/>
-                                                                <MenuItem text="Debug"/>
+                                                                <MenuItem text="Run Current File" onAction="#handleRunAction"/>
+                                                                <MenuItem text="Run Project" onAction="#handleRunProjectAction"/>
+                                                                <MenuItem text="Run All Open Files" onAction="#handleRunAllFilesAction"/>
+                                                                <MenuItem text="Debug" onAction="#handleDebugAction"/>
                                                             </items>
                                                             <tooltip>
                                                                 <Tooltip text="Run options (F5)"/>
@@ -503,8 +505,7 @@
                                             <ListView fx:id="problemsPanel" styleClass="problems-list"
                                                       visible="false"/>
 
-                                            <TextArea fx:id="outputPanel" editable="false"
-                                                      style="-fx-background-color: #1e1e1e; -fx-text-fill: #d4d4d4;"
+                                            <TextArea fx:id="outputPanel" editable="false" styleClass="output-panel"
                                                       visible="false"/>
 
                                             <TextArea fx:id="debugConsolePanel" editable="false"
@@ -553,7 +554,7 @@
                                 </Menu>
                                 <SeparatorMenuItem mnemonicParsing="false"/>
                                 <MenuItem mnemonicParsing="false" text="Open File..." accelerator="Shortcut+O"/>
-                                <MenuItem mnemonicParsing="false" text="Open Folder..." accelerator="Shortcut+K"/>
+                                <MenuItem mnemonicParsing="false" text="Open Folder..." accelerator="Shortcut+K" onAction="#handleMenuOpenFolder"/>
                                 <MenuItem mnemonicParsing="false" text="Open Workspace from File..."/>
                                 <Menu mnemonicParsing="false" text="Open Recent">
                                     <!-- Elementos recientes aquí -->
@@ -583,7 +584,7 @@
 
                                 <MenuItem mnemonicParsing="false" text="Revert File"/>
                                 <MenuItem mnemonicParsing="false" text="Close Editor" accelerator="Shortcut+W"/>
-                                <MenuItem mnemonicParsing="false" text="Close Folder" accelerator="Shortcut+F"/>
+                                <MenuItem mnemonicParsing="false" text="Close Folder" accelerator="Shortcut+F" onAction="#handleMenuCloseFolder"/>
                                 <MenuItem mnemonicParsing="false" text="Close Window" accelerator="Alt+F4"/>
 
                                 <SeparatorMenuItem mnemonicParsing="false"/>

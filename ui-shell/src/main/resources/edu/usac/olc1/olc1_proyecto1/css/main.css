@@ -195,6 +195,18 @@
     -fx-padding: 5 5 10 5;
 }
 
+.tab-pane > .tab-header-area > .control-buttons-tab .tab-down-button .arrow {
+    -fx-background-color: #BDC3D1;
+}
+
+.tab-pane > .tab-header-area > .control-buttons-tab .tab-down-button {
+    -fx-background-color: #2E3139;
+}
+
+.tab-pane > .tab-header-area > .control-buttons-tab .tab-down-button:hover {
+    -fx-background-color: #393c43;
+}
+
 .tab-pane > .tab-content-area {
     -fx-background-color: transparent;
     -fx-border-radius: 10;
@@ -807,4 +819,52 @@
 
 .search-results-list .list-cell:filled:hover {
     -fx-background-color: rgba(97, 175, 239, 0.12);
+}
+
+.source-control-list {
+    -fx-background-color: #24272E;
+    -fx-control-inner-background: #24272E;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.source-control-list .virtual-flow,
+.source-control-list .clipped-container,
+.source-control-list .sheet,
+.source-control-list .viewport {
+    -fx-background-color: #24272E;
+}
+
+.source-control-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(171, 178, 191);
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+    -fx-padding: 6px 10px;
+}
+
+.source-control-list .list-cell:filled:selected {
+    -fx-background-color: rgba(97, 175, 239, 0.25);
+    -fx-text-fill: rgb(171, 178, 191);
+}
+
+.source-control-list .list-cell:filled:hover {
+    -fx-background-color: rgba(97, 175, 239, 0.12);
+}
+
+.output-panel {
+    -fx-background-color: #1F2228;
+    -fx-control-inner-background: #1F2228;
+    -fx-highlight-fill: rgba(97, 175, 239, 0.3);
+    -fx-highlight-text-fill: rgb(171, 178, 191);
+    -fx-text-fill: rgb(171, 178, 191);
+    -fx-font-family: "JetBrains Mono";
+}
+
+.output-panel .content {
+    -fx-background-color: #1F2228;
+}
+
+.output-panel .viewport {
+    -fx-background-color: #1F2228;
 }
