@@ -48,6 +48,22 @@ mvn -pl example-language -am test
 La UI consume implementaciones de `LanguageRuntimePlugin` vía `ServiceLoader`.
 Para integrar otra lógica, crea un módulo que implemente `ui-api` y registra el provider en `META-INF/services`.
 
+## Flujo UI actual
+
+- Comando de terminal: `run [archivo|carpeta]` (alias: `ricardious`).
+- Botón `Run`: ejecuta automáticamente `run <archivo_activo>`.
+- Dropdown `Run`:
+  - `Run Current File`
+  - `Run Project`
+  - `Run All Open Files`
+- `Source Control`:
+  - muestra `git status`
+  - `Refresh`, `Stage All`, `Commit`
+- Menú `File`:
+  - `Open Folder...` cambia de proyecto
+  - `Close Folder` cierra el proyecto actual
+  - ambas acciones preguntan si hay cambios sin guardar.
+
 ### Plugin propio (resumen)
 
 1. Crea un módulo nuevo (ej. `plugin-mi-lenguaje`).
