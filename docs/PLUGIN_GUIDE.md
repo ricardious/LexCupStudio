@@ -93,8 +93,18 @@ public final class MiRuntimePlugin implements LanguageRuntimePlugin {
         log.accept("Plugin ejecutado");
         return true;
     }
+
+    @Override
+    public List<SourceDiagnostic> analyze(String sourceText, Path projectDir, Consumer<String> log) {
+        // Opcional: devolver errores léxicos/sintácticos para panel PROBLEMS.
+        return List.of();
+    }
 }
 ```
+
+Notas:
+- `analyze(...)` es opcional (método default en la interfaz), pero recomendado.
+- La terminal soporta `run` y `ricardious` como alias del mismo flujo.
 
 ## 4) Registrar plugin (ServiceLoader)
 
@@ -131,7 +141,7 @@ La UI cargará plugins por `ServiceLoader` automáticamente.
 ## Cómo probar rápido
 
 1. Abrir un archivo de entrada en la UI.
-2. Ejecutar el comando (por defecto `ricardious`).
+2. Ejecutar el comando (`run` o `ricardious`).
 3. Ver logs en terminal integrada.
 4. Revisar carpeta de salida (`output/` u otra según `reportsDirectoryName()`).
 
