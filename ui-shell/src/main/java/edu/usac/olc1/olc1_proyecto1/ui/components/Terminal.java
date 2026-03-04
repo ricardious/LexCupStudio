@@ -68,8 +68,7 @@ public class Terminal extends ScrollPane {
         // Load font
         try {
             Font.loadFont(Fonts.ttf("JetBrainsMono-Regular.ttf"), 14);
-        } catch (Exception e) {
-            System.err.println("Could not load custom font: " + e.getMessage());
+        } catch (Exception ignored) {
         }
 
         // Register command handlers
@@ -186,8 +185,7 @@ public class Terminal extends ScrollPane {
                 }
                 return headContent.substring(0, 7); // Detached HEAD state, show commit hash
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
         return "main"; // Default fallback
     }
@@ -390,6 +388,20 @@ public class Terminal extends ScrollPane {
         displayOutput(output);
     }
 
+    public void executeCommandFromUi(String command) {
+        if (command == null) {
+            return;
+        }
+        String normalized = command.trim();
+        if (normalized.isEmpty()) {
+            return;
+        }
+        displayExecutedCommand(normalized);
+        processCommand(normalized);
+        inputField.clear();
+        Platform.runLater(() -> inputField.requestFocus());
+    }
+
     public void displayOutput(String output) {
         if (output == null || output.isEmpty()) {
             return;
@@ -449,8 +461,7 @@ public class Terminal extends ScrollPane {
                 reader.close();
                 historyIndex = commandHistory.size();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 
@@ -463,8 +474,7 @@ public class Terminal extends ScrollPane {
                 writer.newLine();
             }
             writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 

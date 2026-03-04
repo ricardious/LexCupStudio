@@ -275,4 +275,15 @@ public class TabManager {
         }
         return tab.getText().replace(" ●", "");
     }
+
+    public List<File> getOpenFiles() {
+        List<File> files = new ArrayList<>();
+        for (Tab tab : editorTabPane.getTabs()) {
+            File file = fileMap.get(tab);
+            if (file != null && file.isFile()) {
+                files.add(file);
+            }
+        }
+        return files;
+    }
 }

@@ -24,8 +24,7 @@ public class ResourceManager {
         try {
             maximizeIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/edu/usac/olc1/olc1_proyecto1/icons/maximize.png")));
             restoreIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/edu/usac/olc1/olc1_proyecto1/icons/restore.png")));
-        } catch (Exception e) {
-            System.err.println("Failed to load icons: " + e.getMessage());
+        } catch (Exception ignored) {
         }
     }
 

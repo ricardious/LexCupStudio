@@ -25,19 +25,15 @@ public class FileManager {
         dialog.setTitle("Create New File");
         dialog.setHeaderText("Enter the file name:");
         dialog.setContentText("File name:");
-        System.out.println("Trying to create file in: " + directory.getAbsolutePath());
         return dialog.showAndWait().map(fileName -> {
             File newFile = new File(directory, fileName);
             try {
                 if (newFile.createNewFile()) {
-                    System.out.println("File created: " + newFile.getAbsolutePath());
                     return newFile;
                 } else {
-                    System.out.println("File already exists.");
                     return null;
                 }
             } catch (IOException e) {
-                System.err.println("Error creating file: " + e.getMessage());
                 return null;
             }
         }).orElse(null);
@@ -49,14 +45,11 @@ public class FileManager {
         dialog.setTitle("Create New Folder");
         dialog.setHeaderText("Enter the folder name:");
         dialog.setContentText("Folder name:");
-        System.out.println("Trying to create folder in: " + directory.getAbsolutePath());
         return dialog.showAndWait().map(folderName -> {
             File newFolder = new File(directory, folderName);
             if (newFolder.mkdir()) {
-                System.out.println("Folder created: " + newFolder.getAbsolutePath());
                 return newFolder;
             } else {
-                System.out.println("Failed to create folder. It may already exist.");
                 return null;
             }
         }).orElse(null);
@@ -136,8 +129,7 @@ public class FileManager {
         if (file == null) return;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(codeArea.getText());
-        } catch (IOException e) {
-            System.err.println("Error saving file: " + e.getMessage());
+        } catch (IOException ignored) {
         }
         codeArea.getUndoManager().mark();
     }

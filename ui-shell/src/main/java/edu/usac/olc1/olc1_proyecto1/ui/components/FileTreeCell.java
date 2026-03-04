@@ -60,12 +60,9 @@ public class FileTreeCell extends TreeCell<String> {
             if (selectedItem == null) return;
 
             File selectedFile = fileManager.getFileFromTreeItem(selectedItem, baseDirectory);
-            System.out.println("Selected item: " + selectedItem.getValue());
-            System.out.println("Selected file path: " + (selectedFile != null ? selectedFile.getAbsolutePath() : "null"));
 
             if (selectedFile != null) {
                 File targetDir = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
-                System.out.println("Target directory: " + targetDir.getAbsolutePath());
 
                 File newFile = fileManager.createNewFile(targetDir);
                 if (newFile != null) {
@@ -87,12 +84,9 @@ public class FileTreeCell extends TreeCell<String> {
             if (selectedItem == null) return;
 
             File selectedFile = fileManager.getFileFromTreeItem(selectedItem, baseDirectory);
-            System.out.println("Selected item: " + selectedItem.getValue());
-            System.out.println("Selected file path: " + (selectedFile != null ? selectedFile.getAbsolutePath() : "null"));
 
             if (selectedFile != null) {
                 File targetDir = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
-                System.out.println("Target directory: " + targetDir.getAbsolutePath());
 
                 File newFolder = fileManager.createNewFolder(targetDir);
                 if (newFolder != null) {
